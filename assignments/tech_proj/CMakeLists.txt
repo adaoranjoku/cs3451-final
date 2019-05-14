@@ -86,6 +86,13 @@ list(APPEND src_files ${tiny_gltf_cpp} ${tiny_gltf_h})
 source_group("tiny_gltf" FILES ${tiny_gltf_cpp} ${tiny_gltf_h})
 include_directories(${root_path}/ext/tiny_gltf)
 
+#include header and source files in /l_system_code
+file(GLOB_RECURSE lsys_cpp ${root_path}/l_system_code/*.cpp)
+file(GLOB_RECURSE lsys_h ${root_path}/l_system_code/*.h)
+list(APPEND src_files ${lsys_cpp} ${lsys_h})
+source_group("l_system" FILES ${lsys_cpp} ${lsys_h})
+include_directories(${root_path}/l_system_code)
+
 #set compiling flags
 set(CMAKE_CXX_STANDARD 11)	#c++11
 if(UNIX)

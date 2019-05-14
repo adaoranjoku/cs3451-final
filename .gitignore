@@ -1,3 +1,7 @@
 /build
 /solution
+.vs
+.vcxproj
+.vcxproj.filters
+.sln
 /dirt/build
