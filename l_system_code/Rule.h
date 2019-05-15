@@ -14,5 +14,8 @@ public:
 	virtual bool satisfied(Module m) const {
 		return false;
 	};
+	virtual std::vector<Module> parse(Module m) const {
+		return std::vector<Module>();
+	}
 
 };
