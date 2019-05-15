@@ -19,3 +19,19 @@ public:
 	}
 
 };
+
+// Meant for parsing the angle module
+class A_Rule : public Rule
+{
+public:
+	bool satisfied(Module m) const;
+	std::vector<Module> parse(Module m) const;
+};
+
+// Meant for parsing the branch module
+class B_Rule : public Rule
+{
+public:
+	bool satisfied(Module m) const;
+	std::vector<Module> parse(Module m) const;
+};
