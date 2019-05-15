@@ -1,5 +1,6 @@
 #include "LinkedList.h"
 #include <iostream>
+#include <vector>
 
 int main(){
 
@@ -36,11 +37,28 @@ list.display();
 int r = list.size();
 std::cout<<r<<std::endl;
 int y=0;
-for(auto i = list.begin(),i!=list.end(),i++ ){
-    std::cout<<y<<std::endl;
-    y++;
 
-}
+LinkedList<int> nlist = LinkedList<int>();
+std::vector<int> the_vector{1,2,3,4};
+nlist.insertVector(the_vector);
+nlist.display();
+
+
+nlist.popFront();
+nlist.display();
+nlist.pop();
+nlist.display();
+
+nlist.popFront();
+nlist.display();
+
+nlist.popFront();
+nlist.display();
+/*for(auto i = list.begin(),i!=list.end(),i++ ){
+    std::cout<<y<<std::endl;
+    y++; */
+
+//}
 std::cout<<"Testing is completed. The program functions correctly"<<std::endl;
 
 return 0; 

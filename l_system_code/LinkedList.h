@@ -6,10 +6,10 @@
 
 */
 
-
+#include <vector>
 #include <iostream>
 
-template <class T> const_iterator;
+//template <class T> const_iterator;
 
 template <class T>
 struct node
@@ -25,10 +25,19 @@ class LinkedList
 {
     typedef T * iterator;
     typedef const T * const_iterator;
+/*    typedef LinkedList<T> iterator;
+    typedef ptrdiff_t difference_type;
+    typedef size_t size_type;
+    typedef T value_type;
+    typedef T * pointer;
+    typedef T & reference;
+*/
+ 
+
     private:
         node<T> *startNode;
         node<T> *tailNode;         
-        friend class const_iterator<T>;
+  //      friend class const_iterator<T>;
 
     public:
         //Constructor: takes data of type T
@@ -38,6 +47,10 @@ class LinkedList
         }
         // destructor?
 
+        /*Insert a node. 
+            If pos is not specified, it will insert at end of list. 
+            If pos is specified, insert at position pos in the list. 
+        */
         void insertNode(T t, int pos = -1){
             node<T> *theNode = new node<T>;
             theNode->obj =t;
@@ -72,6 +85,58 @@ class LinkedList
             }
         }
 
+        //insert a vector of objects std::vector. Follows same rules as insertNode.
+        void insertVector(const std::vector<T>& Vector, int pos = -1){
+            bool change = false;
+            if(pos != -1){ change=true;}
+            for(auto node:Vector){
+                if(change==true){
+                    insertNode(node, pos);
+                    pos += 1;
+                }
+                else{
+                    insertNode(node);
+                }
+
+            }
+    
+        }
+
+        //pop and return first node in list
+        T popFront(){
+            T toPop = startNode->obj;
+            if(startNode!=tailNode){
+                startNode = startNode->next; 
+            }
+            else{startNode = NULL; tailNode=NULL;}   
+            return toPop;
+        }
+
+
+        // pop and return last node in list
+        T pop(){
+            T toPop = tailNode->obj;
+            if(startNode!=tailNode){
+                node<T> *pNode= new node<T>;
+                pNode = startNode;
+                while (pNode->next != tailNode){
+                    pNode = pNode->next;
+                }
+                tailNode = pNode;
+                tailNode->next = NULL;
+                pNode = NULL;
+                delete pNode;    
+            }
+            else{
+                startNode=NULL;
+                tailNode=NULL;
+            }
+    
+            return toPop;
+
+        }
+
+        //return the size of the list
         int size(){
             int i = 0;
 
@@ -85,7 +150,7 @@ class LinkedList
             return i;
         }
 
-
+        //Delete a node containing the object: T t
         void deleteNode(T t){
             node<T> *pNode = new node<T>;
             node<T> *cNode = new node<T>;
@@ -112,10 +177,11 @@ class LinkedList
             delete pNode;
         }
 
+        //iterators- do not currently work
         iterator begin(){return startNode;}
         iterator end(){return tailNode;}
 
-
+        //Print each object in the list
         void display(){
             node<T> *pNode = new node<T>; 
             pNode = startNode;
@@ -132,8 +198,8 @@ class LinkedList
 };
 
 
-template <class T>
-class const_iterator{
+//template <class T>
+//class const_iterator{
 
 
-};
+//};
