@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Rule.h"
+#include "LinkedList.h"
 
 class Rules
 {
@@ -16,5 +17,5 @@ public:
 	//Constructor
 	Rules(std::vector<Rule> rules);
 
-	std::vector<Module> parse(Module m) const;
+	LinkedList<Module> parse(Module m) const;
 };

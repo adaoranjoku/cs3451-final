@@ -5,7 +5,7 @@ Rules::Rules(std::vector<Rule> rules)
 	_rules = rules;
 }
 
-std::vector<Module> Rules::parse(Module m) const
+LinkedList<Module> Rules::parse(Module m) const
 {
 	for (auto rule : _rules) {
 		//Get first satisfied rule
@@ -14,5 +14,7 @@ std::vector<Module> Rules::parse(Module m) const
 		}
 	}
 	//Default to returning this module
-	return { m };
+	auto list = LinkedList<Module>();
+	list.insertNode(m);
+	return list;
 }

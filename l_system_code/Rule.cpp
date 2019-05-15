@@ -11,10 +11,12 @@ bool B_Rule::satisfied(Module m) const
 	return true;
 }
 
-std::vector<Module> B_Rule::parse(Module m) const
+LinkedList<Module> B_Rule::parse(Module m) const
 {
 	//TODO
-	return { m };
+	auto list = LinkedList<Module>();
+	list.insertNode(m);
+	return list;
 }
 
 bool A_Rule::satisfied(Module m) const
@@ -23,8 +25,10 @@ bool A_Rule::satisfied(Module m) const
 	return true;
 }
 
-std::vector<Module> A_Rule::parse(Module m) const
+LinkedList<Module> A_Rule::parse(Module m) const
 {
 	//TODO
-	return { m };
+	auto list = LinkedList<Module>();
+	list.insertNode(m);
+	return list;
 }
