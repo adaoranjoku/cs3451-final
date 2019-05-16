@@ -15,6 +15,11 @@
 #include "OpenGLParticles.h"
 #include "TinyObjLoader.h"
 
+#include "Module.h"
+#include "Rules.h"
+#include "Rule.h"
+#include "System.h"
+
 class TechProjDriver : public Driver, public OpenGLViewer
 {
 	using Base = Driver;
@@ -347,14 +352,51 @@ protected:
 
 int main(int argc,char* argv[])
 {
-	int driver=1;
+	std::map<char, int> alphabet;
+	alphabet['A'] = 0;
+	alphabet['B'] = 0;
+	std::string axiom = "A";
+	std::map<char, Rules> productions;
+	productions['A'] = Rules();
+	productions['B'] = Rules();
 
-	switch(driver){
-	case 1:{
-		TechProjDriver driver;
-		driver.Initialize();
-		driver.Run();	
-	}break;
+	class ARule : public Rule {
+		bool satisfied(Module m) { return true; }
+		LinkedList<Module> parse(Module m) {
+			LinkedList<Module> modules;
+			modules.insertNode(m);
+			modules.insertNode(Module('B'));
+			return modules;
+		}
+	};
+	productions['A'].addRule(ARule());
+	class BRule : public Rule {
+		bool satisfied(Module m) { return true; }
+		LinkedList<Module> parse(Module m) {
+			LinkedList<Module> modules;
+			modules.insertNode(m);
+			return modules;
+		}
+	};
+	productions['B'].addRule(BRule());
+
+	System algae = System(alphabet, axiom, productions);
+	std::cout << std::endl << algae.toString() << std::endl << std::flush;
+	for (int i = 0; i < 4; i++) {
+		algae.nextSystem();
+		std::cout << std::endl << algae.toString() << std::endl << std::flush;
 	}
+	//int driver=1;
+
+	//switch(driver){
+	//case 1:{
+	//	TechProjDriver driver;
+	//	driver.Initialize();
+	//	driver.Run();	
+	//}break;
+	//}
+
+	//Create modules
+	
 }
 

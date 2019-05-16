@@ -29,6 +29,8 @@ public:
 	System(std::map<char, int> alphabet, std::string axiom, std::map<char, Rules> productions);
 
 	LinkedList<Module> currentSystem(void) const;
-	LinkedList<Module> getNextSystem(void);
-	LinkedList<Module> moveToIteration(int i);
+	void nextSystem(void);
+	void moveToIteration(int i);
+
+	std::string toString(void) const;
 };

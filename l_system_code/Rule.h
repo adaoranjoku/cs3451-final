@@ -22,17 +22,17 @@ public:
 };
 
 // Meant for parsing the angle module
-static class A_Rule : public Rule
+class A_Rule : public Rule
 {
 public:
-	static bool satisfied(Module m);
-	static LinkedList<Module> parse(Module m);
+	bool satisfied(Module m);
+	LinkedList<Module> parse(Module m);
 };
 
 // Meant for parsing the branch module
-static class B_Rule : public Rule
+class B_Rule : public Rule
 {
 public:
-	static bool satisfied(Module m);
-	static LinkedList<Module> parse(Module m);
+	bool satisfied(Module m);
+	LinkedList<Module> parse(Module m);
 };

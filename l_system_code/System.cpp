@@ -76,13 +76,12 @@ LinkedList<Module> System::currentSystem(void) const
 	return _curr_state;
 }
 
-LinkedList<Module> System::getNextSystem(void)
+void System::nextSystem(void)
 {
 	iterate();
-	return _curr_state;
 }
 
-LinkedList<Module> System::moveToIteration(int i)
+void System::moveToIteration(int i)
 {
 	if (i < _n) {
 		reset();
@@ -90,5 +89,32 @@ LinkedList<Module> System::moveToIteration(int i)
 	while (_n != i) {
 		iterate();
 	}
-	return _curr_state;
+}
+
+std::string System::toString(void) const
+{
+	std::stringstream ss;
+	auto copy = _curr_state;
+	while (copy.size() != 0) {
+		Module curr_module = copy.popFront();
+
+		char letter = curr_module.letter();
+		int param_num = _alphabet.find(letter)->second;
+
+		ss << letter;
+
+		if (param_num == 0) {
+			continue;
+		}
+
+		ss << '(';
+
+		for (int i = 0; i < _alphabet.find(letter)->second; i++) {
+			ss << curr_module.param(i) << ",";
+		}
+
+		ss.seekp(-1, ss.cur);
+		ss << ')';
+	}
+	return ss.str();
 }
