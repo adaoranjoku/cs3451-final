@@ -4,6 +4,7 @@
 
 int main(){
 
+//test insertNode
 LinkedList<char> list = LinkedList<char>();
 list.display();
 list.insertNode('r');
@@ -11,23 +12,27 @@ list.display();
 list.insertNode('q',0);
 list.display();
 list.insertNode('s');
-
 std::cout<<"The linked list should be q,r,s"<<std::endl;
 list.display();
 
+//delete node
 list.deleteNode('s');
-
 std::cout<<"The linked list should be q,r"<<std::endl;
-
 list.display();
+
+//more insert node
 list.insertNode('x');
 list.insertNode('y');
 list.insertNode('z');
 list.insertNode('a',1);
 std::cout<<"lastone"<<std::endl;
 list.display();
+
+//list size
 int i = list.size();
 std::cout<<i<<std::endl;
+
+//list delete node 2nd time
 list.deleteNode('y');
 list.display();
 int q = list.size();
