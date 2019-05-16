@@ -15,6 +15,12 @@
 #include "OpenGLParticles.h"
 #include "TinyObjLoader.h"
 
+#include "Module.h"
+#include "Rules.h"
+#include "Rule.h"
+#include "System.h"
+#include <List>
+
 class TechProjDriver : public Driver, public OpenGLViewer
 {
 	using Base = Driver;
@@ -347,14 +353,72 @@ protected:
 
 int main(int argc,char* argv[])
 {
-	int driver=1;
+	std::map<char, int> alphabet;
+	alphabet['A'] = 2;
+	alphabet['B'] = 1;
+	alphabet['C'] = 0;
+	std::string axiom = "B(2)A(4,4)";
+	std::map<char, Rules> productions;
+	productions['A'] = Rules();
+	productions['B'] = Rules();
+	productions['C'] = NullRules();
 
-	switch(driver){
-	case 1:{
-		TechProjDriver driver;
-		driver.Initialize();
-		driver.Run();	
-	}break;
+	class ARule1 : public Rule {
+		virtual bool satisfied(Module m) const override { return m.param(1) <= 3; }
+		virtual std::list<Module> parse(Module m) const override {
+			std::list<Module> modules = std::list<Module>();
+			modules.push_back(Module('A', { m.param(0) * 2, m.param(0) + m.param(1) }));
+			return modules;
+		}
+	};
+	class ARule2 : public Rule {
+		virtual bool satisfied(Module m) const override { return m.param(1) > 3; }
+		virtual std::list<Module> parse(Module m) const override {
+			std::list<Module> modules = std::list<Module>();
+			modules.push_back(Module('B', { m.param(0) }));
+			modules.push_back(Module('A', { m.param(0) / m.param(1), 0.f }));
+			return modules;
+		}
+	};
+	productions['A'].addRule(new ARule1());
+	productions['A'].addRule(new ARule2());
+
+	class BRule1 : public Rule {
+		virtual bool satisfied(Module m) const override { return m.param(0) < 1; }
+		virtual std::list<Module> parse(Module m) const override {
+			std::list<Module> modules;
+			modules.push_back(Module('C'));
+			return modules;
+		}
+	};
+	class BRule2 : public Rule {
+		virtual bool satisfied(Module m) const override { return m.param(0) >= 1; }
+		virtual std::list<Module> parse(Module m) const override {
+			std::list<Module> modules;
+			modules.push_back(Module('B', {m.param(0) - 1}));
+			return modules;
+		}
+	};
+	productions['B'].addRule(new BRule1());
+	productions['B'].addRule(new BRule2());
+
+	System algae = System(alphabet, axiom, productions);
+	std::cout << std::endl << algae.toString() << std::endl << std::flush;
+	for (int i = 0; i < 4; i++) {
+		algae.iterate();
+		std::cout << std::endl << algae.toString() << std::endl << std::flush;
 	}
+	//int driver=1;
+
+	//switch(driver){
+	//case 1:{
+	//	TechProjDriver driver;
+	//	driver.Initialize();
+	//	driver.Run();	
+	//}break;
+	//}
+
+	//Create modules
+	
 }
 
