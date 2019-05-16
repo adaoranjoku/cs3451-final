@@ -6,50 +6,70 @@
 
 #include "System.h"
 #include <sstream>
+#include <regex>
 
-LinkedList<Module> System::string_to_Modules(std::string st)
+std::list<Module> System::string_to_Modules(std::string& st)
 {
-	//Make an alphabet string
-	std::string alphabet;
+	//Make the regex
+	std::stringstream pattern;
 	for (auto p : _alphabet) {
-		alphabet += p.first;
-	}
+		pattern << p.first;
 
-	int last_index = 0;
-	std::size_t found;
-	auto list = LinkedList<Module>();
-	//iterate through the string
-	while ((found = st.find(alphabet, last_index + 1)) != std::string::npos) {
-		list.insertNode(one_Module(st.substr(last_index, found - last_index)));
-		last_index = found;
+		if (p.second == 0) { 
+			pattern << "|";
+			continue;
+		}
+		pattern << "\\(";
+		for (int i = 0; i < p.second; i++) {
+			pattern << "[-+]?[0-9]*\\.?[0-9]+,";
+		}
+		pattern.seekp(-1, pattern.cur);
+		pattern << "\\)|";
 	}
+	std::regex rpattern = std::regex(pattern.str());
+
+	//Iterate using the regex
+	auto beginning = std::sregex_iterator(st.begin(), st.end(), rpattern);
+	auto list = std::list<Module>();
+	for (auto i = beginning; i != std::sregex_iterator(); i++) {
+		std::string match = i->str();
+		list.push_back(one_Module(match));
+	}
+	list.pop_back();
 	return list;
 }
 
-Module System::one_Module(std::string st)
+Module System::one_Module(std::string& st)
 {
 	char letter = st[0];
-	std::vector<float> params(_alphabet[letter]);
+	auto params = std::vector<float>();
 	std::stringstream ss(st);
 
+	if (_alphabet[letter] != 0) {
+		ss.seekg(1, ss.cur);		// Move past the letter
+	}
+
 	for (int i = 0; i < _alphabet[letter]; i++) {
-		ss >> params[i];
+		ss.seekg(1, ss.cur);		// Move past the parens or commas
+		float p;
+		ss >> p;
+		params.push_back(p);	
 	}
 
 	return Module(letter, params);
 }
 
-void System::iterate()
+void System::iterate(void)
 {
 	_n++;
 
-	auto temp_list = LinkedList<Module>();
-	while (_curr_state.size != 0) {
-		auto module = _curr_state.popFront();
-		auto rules = _productions[module.letter()];
-		auto result = rules.parse(module);
+	auto temp_list = std::list<Module>();
+	for (Module mod : _curr_state) {
 
-		//add from result to back of temp_list
+		auto rules = _productions[mod.letter()];
+		auto result = rules.parse(mod);
+
+		temp_list.splice(temp_list.end(), result);
 	}
 
 	_curr_state = temp_list;
@@ -61,7 +81,7 @@ void System::reset()
 	_curr_state = _axiom;
 }
 
-System::System(std::map<char, int> alphabet, std::string axiom, std::map<char, Rules> productions)
+System::System(std::map<char, int>& alphabet, std::string& axiom, std::map<char, Rules>& productions)
 {
 	_alphabet = alphabet;
 	_productions = productions;
@@ -71,14 +91,9 @@ System::System(std::map<char, int> alphabet, std::string axiom, std::map<char, R
 	_curr_state = _axiom;
 }
 
-LinkedList<Module> System::currentSystem(void) const
+std::list<Module> System::currentSystem(void) const
 {
 	return _curr_state;
-}
-
-void System::nextSystem(void)
-{
-	iterate();
 }
 
 void System::moveToIteration(int i)
@@ -94,10 +109,7 @@ void System::moveToIteration(int i)
 std::string System::toString(void) const
 {
 	std::stringstream ss;
-	auto copy = _curr_state;
-	while (copy.size() != 0) {
-		Module curr_module = copy.popFront();
-
+	for (auto curr_module : _curr_state) {
 		char letter = curr_module.letter();
 		int param_num = _alphabet.find(letter)->second;
 
@@ -116,5 +128,6 @@ std::string System::toString(void) const
 		ss.seekp(-1, ss.cur);
 		ss << ')';
 	}
+
 	return ss.str();
 }

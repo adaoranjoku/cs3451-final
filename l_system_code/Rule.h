@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "Module.h";
-#include "LinkedList.h";
+#include "Module.h"
+#include <List>
 
 // Class to represent one rule to change modules
 class Rule
@@ -16,8 +16,8 @@ public:
 	virtual bool satisfied(Module m) const {
 		return false;
 	};
-	virtual LinkedList<Module> parse(Module m) const {
-		return LinkedList<Module>();
+	virtual std::list<Module> parse(Module m) const {
+		return std::list<Module>();
 	}
 };
 
@@ -25,14 +25,14 @@ public:
 class A_Rule : public Rule
 {
 public:
-	bool satisfied(Module m);
-	LinkedList<Module> parse(Module m);
+	virtual bool satisfied(Module m) const override;
+	virtual std::list<Module> parse(Module m) const override;
 };
 
 // Meant for parsing the branch module
 class B_Rule : public Rule
 {
 public:
-	bool satisfied(Module m);
-	LinkedList<Module> parse(Module m);
+	virtual bool satisfied(Module m) const override;
+	virtual std::list<Module> parse(Module m) const override;
 };
