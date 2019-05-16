@@ -86,7 +86,7 @@ class LinkedList
         }
 
         //insert a vector of objects std::vector. Follows same rules as insertNode.
-        void insertVector(const std::vector<T> *Vector, int pos = -1){
+        void insertVector(const std::vector<T> &Vector, int pos = -1){
             bool change = false;
             if(pos != -1){ change=true;}
             for(auto node:Vector){
