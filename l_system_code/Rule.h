@@ -9,6 +9,7 @@
 #include "Module.h";
 #include "LinkedList.h";
 
+// Class to represent one rule to change modules
 class Rule
 {
 public:
@@ -21,17 +22,17 @@ public:
 };
 
 // Meant for parsing the angle module
-class A_Rule : public Rule
+static class A_Rule : public Rule
 {
 public:
-	bool satisfied(Module m) const;
-	LinkedList<Module> parse(Module m) const;
+	static bool satisfied(Module m);
+	static LinkedList<Module> parse(Module m);
 };
 
 // Meant for parsing the branch module
-class B_Rule : public Rule
+static class B_Rule : public Rule
 {
 public:
-	bool satisfied(Module m) const;
-	LinkedList<Module> parse(Module m) const;
+	static bool satisfied(Module m);
+	static LinkedList<Module> parse(Module m);
 };

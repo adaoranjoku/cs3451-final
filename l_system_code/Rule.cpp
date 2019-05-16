@@ -5,13 +5,13 @@
 	Created 14 May 2019
 */
 
-bool B_Rule::satisfied(Module m) const
+bool B_Rule::satisfied(Module m)
 {
 	//TODO
 	return true;
 }
 
-LinkedList<Module> B_Rule::parse(Module m) const
+LinkedList<Module> B_Rule::parse(Module m)
 {
 	//TODO
 	auto list = LinkedList<Module>();
@@ -19,13 +19,13 @@ LinkedList<Module> B_Rule::parse(Module m) const
 	return list;
 }
 
-bool A_Rule::satisfied(Module m) const
+bool A_Rule::satisfied(Module m)
 {
 	//TODO
 	return true;
 }
 
-LinkedList<Module> A_Rule::parse(Module m) const
+LinkedList<Module> A_Rule::parse(Module m)
 {
 	//TODO
 	auto list = LinkedList<Module>();
