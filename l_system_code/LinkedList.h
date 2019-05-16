@@ -17,6 +17,14 @@ struct node
     T obj;
     node *next;
 
+    void node(){
+        obj = NULL;
+        next=NULL;
+    }
+    void node(T t){
+        obj = t;
+        next = NULL;
+    }
 };
 
 
