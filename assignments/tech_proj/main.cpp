@@ -52,9 +52,10 @@ public:
 	void Init_Lighting() {
 		auto dir_light = OpenGLUbos::Add_Directional_Light(glm::vec3(-1.f, -1.f, -1.f));
 		dir_light->dif = glm::vec4(.9,.8,.7, 1.0);
+		//dir_light->Set_Shadow();////SHADOW TODO: turn on the shadow by uncommenting this line
 
-		dir_light = OpenGLUbos::Add_Directional_Light(glm::vec3(1.f, -1.f, -1.f));
-		dir_light->dif = glm::vec4(.7,.7,.7, 1.0);
+		//dir_light = OpenGLUbos::Add_Directional_Light(glm::vec3(1.f, -1.f, -1.f));
+		//dir_light->dif = glm::vec4(.7,.7,.7, 1.0);
 
 		OpenGLUbos::Set_Ambient(glm::vec4(.01f, .01f, .02f, 1.f));
 		OpenGLUbos::Update_Lights_Ubo();	
@@ -67,6 +68,7 @@ public:
 		Add_Shader("shaders/background.vert","shaders/background.frag","background");
 		Add_Shader("shaders/shared.vert", "shaders/lamb_textured.frag", "lamb_tex");
 		Add_Shader("shaders/shared.vert", "shaders/lamb.frag", "lamb");
+		////SHADOW TODO: add your shadow depth shader and your shadow rendering shader here, OR implement the predefined shaders in OpenGLShaderProgram.cpp
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -221,7 +223,7 @@ protected:
 	void Set_Mesh_Default_Options(OpenGLTriangleMesh* opengl_tri_mesh)
 	{
 		Set_Polygon_Mode(opengl_tri_mesh, PolygonMode::Fill);
-		Set_Shading_Mode(opengl_tri_mesh, ShadingMode::Custom);
+		Set_Shading_Mode(opengl_tri_mesh, ShadingMode::Custom);		////SHADOW TODO: change mode to ShadingMode::Shadow
 		opengl_tri_mesh->Set_Data_Refreshed();
 		opengl_tri_mesh->Initialize();
 	}

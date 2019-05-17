@@ -295,6 +295,68 @@ void main()
 }
 );
 
+//////////////////////////////////////////////////////////////////////////
+////SHADOW TODO: implement all the functions below 
+
+const std::string shadow_func=To_String(
+float shadow(vec4 shadow_pos,vec3 normal,vec3 light_dir)
+{
+	////SHADOW TODO: your implementation
+	return 0.;
+}
+);
+
+const std::string vnormal_vfpos_vsdpos_vtx_shader=To_String(
+~include version;
+~include camera;
+uniform mat4 shadow_pv;
+uniform mat4 model=mat4(1.0f);
+layout (location=0) in vec4 pos;
+layout (location=1) in vec4 normal;
+out vec3 vtx_normal;
+out vec3 vtx_frg_pos;
+out vec4 vtx_shadow_pos;
+
+void main()
+{
+	////SHADOW TODO: your implementation
+}
+);
+
+const std::string vnormal_vfpos_lt_sd_frg_shader=To_String(
+~include version;
+~include material;
+~include camera;
+~include lights;
+~include phong_dl_func;
+uniform sampler2D shadow_map;
+~include shadow_func;
+in vec3 vtx_normal;
+in vec3 vtx_frg_pos;
+in vec4 vtx_shadow_pos;
+out vec4 frag_color;
+
+void main()
+{
+    ////SHADOW TODO: your implementation
+}
+);
+
+const std::string shadow_vtx_shader=To_String(
+~include version;
+~include camera;
+uniform mat4 shadow_pv;
+uniform mat4 model=mat4(1.0f);
+layout (location=0) in vec4 pos;
+void main()
+{
+    ////SHADOW TODO: your implementation
+}
+);
+
+//////////////////////////////////////////////////////////////////////////
+
+
 using namespace OpenGLShaders;
 
 //////////////////////////////////////////////////////////////////////////
@@ -477,6 +539,8 @@ void OpenGLShaderLibrary::Initialize_Shaders()
 	Add_Shader(vnormal_vfpos_vtx_shader,vnormal_vfpos_lt_frg_shader,"vnormal_lt");
 	Add_Shader(vclip_vfpos_vtx_shader,gcolor_frg_shader,"gcolor_bk");
 	Add_Shader(vpos_model_vnormal_vfpos_vtx_shader,vnormal_vfpos_dl_fast_frg_shader,"vpos_model_vnormal_dl_fast");
+	Add_Shader(shadow_vtx_shader,none_frg_shader,"sd_depth");
+	Add_Shader(vnormal_vfpos_vsdpos_vtx_shader,vnormal_vfpos_lt_sd_frg_shader,"sd_lt");
 }
 
 void OpenGLShaderLibrary::Update_Shaders()
@@ -501,6 +565,7 @@ void OpenGLShaderLibrary::Initialize_Headers()
 	shader_header_hashtable.insert(std::make_pair("phong_pl_func",phong_pl_func));
 	shader_header_hashtable.insert(std::make_pair("phong_sl_func",phong_sl_func));
 	shader_header_hashtable.insert(std::make_pair("phong_dl_fast_func",phong_dl_fast_func));
+	shader_header_hashtable.insert(std::make_pair("shadow_func",shadow_func));
 
 	OpenGLUbos::Bind_Shader_Ubo_Headers(shader_header_hashtable);
 }

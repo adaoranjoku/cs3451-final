@@ -28,6 +28,8 @@ template<class T_MESH> class OpenGLMesh: public OpenGLObject
 		Base::Initialize();
 		Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("vcolor"));
 		Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("vnormal_lt"));
+		//Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("sd_depth"));		/////SHADOW TODO: uncomment the depth shader
+		//Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("sd_lt"));			/////SHADOW TODO: uncomment the shadow shader
 	}
 
 	virtual void Update_Data_To_Render()
@@ -172,6 +174,48 @@ class OpenGLTriangleMesh : public OpenGLMesh<TriangleMesh<3> >
 		case ShadingMode::Shadow:{use_preprocess=true;use_depth_fbo=true;}break;}
 	}
 
+	void Compute_Shadow_PV(glm::mat4& shadow_pv)	////change the viewport
+	{
+		using namespace OpenGLUbos;using namespace OpenGLFbos;
+		Lights* lights=Get_Lights();if(lights==nullptr)return;
+		Light* lt=lights->First_Shadow_Light();if(lt==nullptr)return;
+		glm::vec3 light_pos=glm::vec3(lt->pos);
+
+		fbo=Get_And_Bind_Fbo("depth",/*depth*/1);
+		glViewport(0,0,fbo->width,fbo->height);
+
+		glm::mat4 proj,view;
+		float np=.001f,fp=10.f;
+		float r=(float)fbo->height/(float)fbo->width;float w=5.f;float h=w*r;
+
+		////TOFIX: fix bug for perspective
+		if(lt->Get_Type()==0){proj=glm::ortho(-w,w,-h,h,np,fp);}	////directional light
+		else{proj=glm::perspective(45.f*(float)3.1415927f/360.f,1.f/r,np,fp);fbo->Set_Near_And_Far_Plane(np,fp);}
+
+		view=glm::lookAt(light_pos,glm::vec3(0.f),glm::vec3(1.f,0.f,0.f));
+		shadow_pv=proj*view;
+	}
+
+	virtual void Preprocess()
+	{
+		using namespace OpenGLUbos;using namespace OpenGLFbos;
+		if(shading_mode!=ShadingMode::Shadow)return;
+
+		GLint viewport[4];glGetIntegerv(GL_VIEWPORT,viewport);
+		Compute_Shadow_PV(shadow_pv);
+
+		std::shared_ptr<OpenGLShaderProgram> shader=shader_programs[2];		/////SHADOW TODO: Set the index to be the shadow depth shader
+		shader->Begin();
+		Bind_Uniform_Block_To_Ubo(shader,"camera");
+		shader->Set_Uniform_Matrix4f("shadow_pv",glm::value_ptr(shadow_pv));
+		glBindVertexArray(vao);
+		glDrawElements(GL_TRIANGLES,ele_size,GL_UNSIGNED_INT,0);
+		shader->End();
+		Unbind_Fbo();
+
+		glViewport(viewport[0],viewport[1],viewport[2],viewport[3]);
+	}
+
 	virtual void Update_Data_To_Render()
 	{
 		if(!Update_Data_To_Render_Pre())return;
@@ -181,6 +225,8 @@ class OpenGLTriangleMesh : public OpenGLMesh<TriangleMesh<3> >
 		{use_vtx_color=true;use_vtx_normal=false;use_vtx_tangent=false; use_vtx_tex =false;}break;
 		case ShadingMode::Lighting:
 		{use_vtx_color=false;use_vtx_normal=true; use_vtx_tangent = false; use_vtx_tex = false; }break;
+		case ShadingMode::Shadow:
+		{use_vtx_color=false;use_vtx_normal=true;use_vtx_tangent=false;use_vtx_tex=false;}break;
 		case ShadingMode::Custom:
 		{use_vtx_color = true; use_vtx_normal = true; use_vtx_tangent = true; use_vtx_tex = true; }break;
 		}
@@ -256,9 +302,22 @@ class OpenGLTriangleMesh : public OpenGLMesh<TriangleMesh<3> >
             glDisable(GL_POLYGON_OFFSET_FILL);
 			shader->End();
 		}break;
+		case ShadingMode::Shadow:{
+			std::shared_ptr<OpenGLShaderProgram> shader=shader_programs[3];		/////SHADOW TODO: Set the index to be the shadow depth shader
+			shader->Begin();
+			if(use_mat)shader->Set_Uniform_Mat(&mat);
+			Bind_Uniform_Block_To_Ubo(shader,"camera");
+			Bind_Uniform_Block_To_Ubo(shader,"lights");
+			if(fbo!=nullptr)fbo->Bind_As_Texture(0);
+			shader->Set_Uniform("shadow_map",0);
+			shader->Set_Uniform_Matrix4f("shadow_pv",glm::value_ptr(shadow_pv));
+			glBindVertexArray(vao);
+			glDrawElements(GL_TRIANGLES,ele_size,GL_UNSIGNED_INT,0);
+			shader->End();
+		}break;
 		case ShadingMode::Custom: {
-			if (shader_programs.size() > 2) {
-				std::shared_ptr<OpenGLShaderProgram> shader = shader_programs[2];
+			if (shader_programs.size() > 2) {										/////SHADOW TODO: Set the index to be the correct one after adding shadow shaders
+				std::shared_ptr<OpenGLShaderProgram> shader = shader_programs[2];	/////SHADOW TODO: Set the index to be the correct one after adding shadow shaders
 				shader->Begin();
 
 				for (int i = 0; i < textures.size(); i++) {
