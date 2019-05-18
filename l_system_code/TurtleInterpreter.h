@@ -8,7 +8,7 @@
 #pragma once
 
 #include "Module.h"
-#include <List>
+#include <list>
 #include <stack>
 #include <glm/glm.hpp>
 
@@ -28,7 +28,7 @@ public:
 
     std::list<glm::mat4> readList();
     void readModule(Module& module);
-    void buildRotation(int degreesPhi, int degreesPsy);
+    void buildRotation(int degreesTheta, int degreesPsy);
     void buildTranslation(int length);
     
 

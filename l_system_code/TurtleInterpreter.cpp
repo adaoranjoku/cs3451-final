@@ -9,15 +9,15 @@
 
 #include "Module.h"
 #include "TurtleInterpreter.h"
-#include <List>
+#include <list>
 #include <stack>
 #include <glm/glm.hpp>
 
 
 TurtleInterpreter::TurtleInterpreter(){
     worldPos = glm::mat4(1.0f);
-    strings = new std::List<Module>(); 
-    matrices  = new std::List<glm::mat4>();
+    strings = new std::list<Module>(); 
+    matrices  = new std::list<glm::mat4>();
     poses = new std::stack<glm::mat4>();
 }
 
@@ -25,7 +25,7 @@ TurtleInterpreter::TurtleInterpreter(std::list<glm::mat4> input){
 
     worldPos = glm::mat4(1.0f); 
     strings = input;  
-    matrices  = new std::List<glm::mat4>();
+    matrices  = new std::list<glm::mat4>();
     poses = new std::stack<glm::mat4>();
 
 }
@@ -48,8 +48,8 @@ void TurtleInterpreter::readModule(Module& module){
 
 }
 
-void TurtleInterpreter::buildRotation(int degreesPhi, int degreesPsy){
-    worldPos=glm::rotate(worldPos,degreesPhi, worldPos[0]);
+void TurtleInterpreter::buildRotation(int degreesTheta, int degreesPsy){
+    worldPos=glm::rotate(worldPos,degreesTheta, worldPos[2]);
     worldPos=glm::rotate(worldPos,degreesPsy, worldPos[1]);
 }
 
