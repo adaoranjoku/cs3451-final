@@ -22,7 +22,6 @@
 #include "System.h"
 #include "TurtleInterpreter.h"
 #include <list>
-#include <utility>
 
 
 class TechProjDriver : public Driver, public OpenGLViewer
@@ -30,8 +29,9 @@ class TechProjDriver : public Driver, public OpenGLViewer
 	using Base = Driver;
 public:
 	Array<TriangleMesh<3>* > triangle_meshes;
-    std::pair<std::list<glm::mat4>,std::list<float>> turtle_pair;
 
+    //stores TurtleInterpreter information
+    TurtleInterpreter::returnVar retTriple;
 
 	virtual void Initialize()
 	{
@@ -107,21 +107,32 @@ public:
     	std::string shader_name = "lamb_tex";
 		std::string texture_name = "bunny";
 
+        //get data structures from struct returned from Turtle Interpreter
+        //local->world transforms
+        std::list<glm::mat4> matrices_from_turtle = retTriple.world_transforms;
+        //lengths of cylinders
+        std::list<float> lengths = retTriple.lengths;
+        //rotations for each cylinder
+        std::list<glm::mat4>rotation = retTriple.rotations;
 
-        std::list<glm::mat4> matrices_from_turtle = turtle_pair.first;
-        std::list<float> lengths = turtle_pair.second;
 
-
-		////Read mesh from obj file
+		////Read meshs from obj file and transform them
         for(auto transform : matrices_from_turtle ){
 
 		    OpenGLTriangleMesh*opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
 		    Read_Mesh(mesh_file_name, opengl_tri_mesh->mesh);
 		    Rescale(opengl_tri_mesh->mesh.Vertices(),1.);
+
+            //USER DEFINED 
+            //Set the length of the Cylinder
             ResizeZ(opengl_tri_mesh->mesh.Vertices(),lengths.front());
+            //Rotate the mesh in place
+            RotateCyl(opengl_tri_mesh->mesh.Vertices(),rotation.front());
+
 		    Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Ones()*.5);
+
 		    ////Initialize the model matrix
-		    opengl_tri_mesh->model_matrix = transform;//glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+		    opengl_tri_mesh->model_matrix = transform;
 
     		////Other mesh initialization setups
 	    	Set_Mesh_Default_Options(opengl_tri_mesh);
@@ -136,6 +147,7 @@ public:
 	    	TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
 		    triangle_meshes.push_back(triangle_mesh);
             lengths.pop_front();
+            rotation.pop_front();
         }
 
 	}
@@ -294,12 +306,26 @@ protected:
 			max_corner=max_corner.cwiseMax(v);}
 	}
 
-	//////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////// USER DEFINED ////////////////////////////////////////////
+    // Set the size of each cylinder by multiplying the vertex y value * length of cylinder
     void ResizeZ(Array<Vector3>& vertices, const real length)
     {
         for(auto& v: vertices){v[1]*=length;}
 
     }
+
+    // Rotate the Cylinder mesh in place by transforming it by rotate
+    void RotateCyl(Array<Vector3>& vertices, const glm::mat4 rotate)
+    {
+        for(auto& v: vertices){//v=Vector3((rotate * glm::vec4(v[0],v[1],v[2],(float)1.0)).xyz());
+            //compute changed coordinates
+            glm::vec4 inter = (rotate * glm::vec4(v[0],v[1],v[2],(float)1.0));
+            //change result to a Vector3 and save it
+            v= Vector3(inter[0],inter[1],inter[2]);
+        }
+ 
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 	////Rescale the points to a box with longest_length
 	void Rescale(Array<Vector3>& vertices,const real longest_length)
 	{
@@ -378,7 +404,7 @@ int main(int argc,char* argv[])
 	alphabet['A'] = 2;
 	alphabet['B'] = 1;
 	alphabet['C'] = 0;
-	std::string axiom = "B(2)A(4,4)B(6)";
+	std::string axiom = "B(2)A(4,4)B(6)A(1,1)B(8)B(5)";
 	std::map<char, Rules> productions;
 	productions['A'] = Rules();
 	productions['B'] = Rules();
@@ -436,9 +462,10 @@ int main(int argc,char* argv[])
 	switch(driver){
 	case 1:{
 		TechProjDriver driver;
-
+        // initialize interpreter
         auto interpreter = TurtleInterpreter(algae.currentSystem());
-        driver.turtle_pair = interpreter.readList();
+        // interpret system and store results in driver class variable
+        driver.retTriple = interpreter.readList();
         std::cout<<"Finished matrix array"<<std::endl;
         interpreter.printCur();
 

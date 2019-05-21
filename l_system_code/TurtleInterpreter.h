@@ -19,22 +19,30 @@ class TurtleInterpreter
 {
 
     glm::mat4 worldPos;
+    glm::mat4 curRotate;
+
+
     std::list<Module> strings;
     std::stack<glm::mat4> poses;
-   
-    std::list<glm::mat4> matrices;
-    std::list<float> lengths; 
+  
+
+    void readModule(Module& module);
+    void buildRotation(float degreesTheta, float degreesPsy);
+    void buildTranslation(int length);
+    void printWorld(glm::mat4 input);
 
 public:
+
+    struct returnVar{ 
+        std::list<glm::mat4> rotations;
+        std::list<glm::mat4> world_transforms;
+        std::list<float> lengths; 
+    }ret;
 
     TurtleInterpreter();
     TurtleInterpreter(std::list<Module> input);
 
-    std::pair<std::list<glm::mat4>,std::list<float>> readList();
-    void readModule(Module& module);
-    void buildRotation(float degreesTheta, float degreesPsy);
-    void buildTranslation(int length);
+    returnVar readList();
     void printCur();    
-    void printWorld(glm::mat4 input);
 
 };
