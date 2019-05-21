@@ -6,19 +6,15 @@
 */
 
 #include <iostream>
-#include "Module.h"
 #include "TurtleInterpreter.h"
-#include <list>
-#include <stack>
-#include "Common.h"
-#include "SceneGraph.h"
-#include "OpenGLMesh.h"
 
 TurtleInterpreter::TurtleInterpreter(){
     worldPos = glm::mat4(1.0f);
     strings = std::list<Module>(); 
     matrices  = std::list<glm::mat4>();
+    lengths = std::list<float>();
     poses = std::stack<glm::mat4>();
+
 }
 
 TurtleInterpreter::TurtleInterpreter(std::list<Module> input){
@@ -26,15 +22,17 @@ TurtleInterpreter::TurtleInterpreter(std::list<Module> input){
     worldPos = glm::mat4(1.0f); 
     strings = input;  
     matrices  = std::list<glm::mat4>();
+    lengths = std::list<float>();
     poses = std::stack<glm::mat4>();
 
 }
 
-std::list<glm::mat4> TurtleInterpreter::readList(){
+std::pair<std::list<glm::mat4>,std::list<float>> TurtleInterpreter::readList(){
     for(auto node = strings.begin(); node != strings.end(); ++node){
        TurtleInterpreter::readModule(*node); 
     }
-    return matrices;
+    std::pair<std::list<glm::mat4>,std::list<float>> return_pair(matrices,lengths); 
+    return return_pair;
 
 }
 
@@ -71,14 +69,21 @@ void TurtleInterpreter::buildRotation(float degreesTheta, float degreesPsy){
 }
 
 void TurtleInterpreter::buildTranslation(int length){
+
+
     std::cout<<"IN TRANSLATE"<<std::endl;
 
-    std::cout<<"before translate"<<std::endl;
-    TurtleInterpreter::printWorld(worldPos);            
-    worldPos = glm::translate(worldPos, glm::vec3(0.0f,0.0f,length));
-    std::cout<<"after translate"<<std::endl;
+    std::cout<<"before translate, pushed to list"<<std::endl;
     TurtleInterpreter::printWorld(worldPos);            
     matrices.push_back(worldPos);
+    lengths.push_back((float)length);
+
+
+    std::cout<<"after translate, not yet pushed to stack"<<std::endl;
+    TurtleInterpreter::printWorld(worldPos);            
+
+    worldPos = glm::translate(worldPos, glm::vec3(0.0f,length,0.0f));
+
 }
 
 void TurtleInterpreter::printWorld(glm::mat4 input){

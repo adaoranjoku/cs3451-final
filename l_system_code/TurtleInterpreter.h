@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <utility>
 #include "Module.h"
 #include <list>
 #include <stack>
@@ -18,17 +19,18 @@ class TurtleInterpreter
 {
 
     glm::mat4 worldPos;
-    std::list<glm::mat4> matrices;
     std::list<Module> strings;
     std::stack<glm::mat4> poses;
-    
+   
+    std::list<glm::mat4> matrices;
+    std::list<float> lengths; 
 
 public:
 
     TurtleInterpreter();
     TurtleInterpreter(std::list<Module> input);
 
-    std::list<glm::mat4> readList();
+    std::pair<std::list<glm::mat4>,std::list<float>> readList();
     void readModule(Module& module);
     void buildRotation(float degreesTheta, float degreesPsy);
     void buildTranslation(int length);

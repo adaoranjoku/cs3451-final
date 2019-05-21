@@ -22,7 +22,7 @@
 #include "System.h"
 #include "TurtleInterpreter.h"
 #include <list>
-
+#include <utility>
 
 
 class TechProjDriver : public Driver, public OpenGLViewer
@@ -30,7 +30,8 @@ class TechProjDriver : public Driver, public OpenGLViewer
 	using Base = Driver;
 public:
 	Array<TriangleMesh<3>* > triangle_meshes;
-    std::list<glm::mat4> matrices_from_turtle;
+    std::pair<std::list<glm::mat4>,std::list<float>> turtle_pair;
+
 
 	virtual void Initialize()
 	{
@@ -107,14 +108,18 @@ public:
 		std::string texture_name = "bunny";
 
 
+        std::list<glm::mat4> matrices_from_turtle = turtle_pair.first;
+        std::list<float> lengths = turtle_pair.second;
+
+
 		////Read mesh from obj file
         for(auto transform : matrices_from_turtle ){
 
 		    OpenGLTriangleMesh*opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
 		    Read_Mesh(mesh_file_name, opengl_tri_mesh->mesh);
 		    Rescale(opengl_tri_mesh->mesh.Vertices(),1.);
+            ResizeZ(opengl_tri_mesh->mesh.Vertices(),lengths.front());
 		    Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Ones()*.5);
-
 		    ////Initialize the model matrix
 		    opengl_tri_mesh->model_matrix = transform;//glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
@@ -130,6 +135,7 @@ public:
     		////Add the triangle mesh to the array to access the mesh later
 	    	TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
 		    triangle_meshes.push_back(triangle_mesh);
+            lengths.pop_front();
         }
 
 	}
@@ -289,6 +295,11 @@ protected:
 	}
 
 	//////////////////////////////////////////////////////////////////////////
+    void ResizeZ(Array<Vector3>& vertices, const real length)
+    {
+        for(auto& v: vertices){v[1]*=length;}
+
+    }
 	////Rescale the points to a box with longest_length
 	void Rescale(Array<Vector3>& vertices,const real longest_length)
 	{
@@ -427,7 +438,7 @@ int main(int argc,char* argv[])
 		TechProjDriver driver;
 
         auto interpreter = TurtleInterpreter(algae.currentSystem());
-        driver.matrices_from_turtle = interpreter.readList();
+        driver.turtle_pair = interpreter.readList();
         std::cout<<"Finished matrix array"<<std::endl;
         interpreter.printCur();
 
