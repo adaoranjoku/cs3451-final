@@ -15,17 +15,22 @@
 #include "OpenGLParticles.h"
 #include "TinyObjLoader.h"
 
+
 #include "Module.h"
 #include "Rules.h"
 #include "Rule.h"
 #include "System.h"
-#include <List>
+#include "TurtleInterpreter.h"
+#include <list>
+
+
 
 class TechProjDriver : public Driver, public OpenGLViewer
 {
 	using Base = Driver;
 public:
 	Array<TriangleMesh<3>* > triangle_meshes;
+    std::list<glm::mat4> matrices_from_turtle;
 
 	virtual void Initialize()
 	{
@@ -97,31 +102,36 @@ public:
 	void Init_Bunny_Mesh() 
 	{
 		////Initialize the mesh file, shader, and texture of the mesh
-		std::string mesh_file_name = "models/bunny.obj";
-		std::string shader_name = "lamb_tex";
+		std::string mesh_file_name = "models/72_tri_cylinder.obj";
+    	std::string shader_name = "lamb_tex";
 		std::string texture_name = "bunny";
 
+
 		////Read mesh from obj file
-		OpenGLTriangleMesh* opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
-		Read_Mesh(mesh_file_name, opengl_tri_mesh->mesh);
-		Rescale(opengl_tri_mesh->mesh.Vertices(),1.);
-		Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Ones()*.5);
+        for(auto transform : matrices_from_turtle ){
 
-		////Initialize the model matrix
-		opengl_tri_mesh->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+		    OpenGLTriangleMesh*opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
+		    Read_Mesh(mesh_file_name, opengl_tri_mesh->mesh);
+		    Rescale(opengl_tri_mesh->mesh.Vertices(),1.);
+		    Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Ones()*.5);
 
-		////Other mesh initialization setups
-		Set_Mesh_Default_Options(opengl_tri_mesh);
+		    ////Initialize the model matrix
+		    opengl_tri_mesh->model_matrix = transform;//glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
-		////Bind an initialized shader to the mesh
-		opengl_tri_mesh->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader(shader_name));
+    		////Other mesh initialization setups
+	    	Set_Mesh_Default_Options(opengl_tri_mesh);
 
-		////Bind a texture to the mesh
-		opengl_tri_mesh->Add_Texture("tex", OpenGLTextureLibrary::Get_Texture(texture_name));
+    		////Bind an initialized shader to the mesh
+	    	opengl_tri_mesh->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader(shader_name));
 
-		////Add the triangle mesh to the array to access the mesh later
-		TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
-		triangle_meshes.push_back(triangle_mesh);
+    		////Bind a texture to the mesh
+	    //	opengl_tri_mesh->Add_Texture("tex", OpenGLTextureLibrary::Get_Texture(texture_name));
+
+    		////Add the triangle mesh to the array to access the mesh later
+	    	TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
+		    triangle_meshes.push_back(triangle_mesh);
+        }
+
 	}
 
 	void Init_Plane_Mesh()
@@ -357,7 +367,7 @@ int main(int argc,char* argv[])
 	alphabet['A'] = 2;
 	alphabet['B'] = 1;
 	alphabet['C'] = 0;
-	std::string axiom = "B(2)A(4,4)";
+	std::string axiom = "B(2)A(4,4)B(6)";
 	std::map<char, Rules> productions;
 	productions['A'] = Rules();
 	productions['B'] = Rules();
@@ -408,15 +418,23 @@ int main(int argc,char* argv[])
 		algae.iterate();
 		std::cout << std::endl << algae.toString() << std::endl << std::flush;
 	}
-	//int driver=1;
+        
+    
+	int driver=1;
 
-	//switch(driver){
-	//case 1:{
-	//	TechProjDriver driver;
-	//	driver.Initialize();
-	//	driver.Run();	
-	//}break;
-	//}
+	switch(driver){
+	case 1:{
+		TechProjDriver driver;
+
+        auto interpreter = TurtleInterpreter(algae.currentSystem());
+        driver.matrices_from_turtle = interpreter.readList();
+        std::cout<<"Finished matrix array"<<std::endl;
+        interpreter.printCur();
+
+		driver.Initialize();
+    	driver.Run();	
+	}break;
+	}
 
 	//Create modules
 	

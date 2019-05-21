@@ -7,7 +7,7 @@
 #pragma once
 
 #include "Rule.h"
-#include <List>
+#include <list>
 #include <memory>
 
 // Class to represent a full set of Rules for a module

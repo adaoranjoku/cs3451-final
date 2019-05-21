@@ -7,7 +7,7 @@
 #pragma once
 
 #include "Module.h"
-#include <List>
+#include <list>
 
 // Class to represent one rule to change modules
 class Rule

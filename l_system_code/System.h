@@ -8,7 +8,7 @@
 
 #include <map>
 #include "Module.h"
-#include <List>
+#include <list>
 #include "Rules.h"
 
 // Class to represent the entire L System

@@ -10,7 +10,9 @@
 #include "Module.h"
 #include <list>
 #include <stack>
-#include <glm/glm.hpp>
+#include "Common.h"
+#include "SceneGraph.h"
+#include "OpenGLMesh.h"
 
 class TurtleInterpreter
 {
@@ -28,8 +30,9 @@ public:
 
     std::list<glm::mat4> readList();
     void readModule(Module& module);
-    void buildRotation(int degreesTheta, int degreesPsy);
+    void buildRotation(float degreesTheta, float degreesPsy);
     void buildTranslation(int length);
-    
+    void printCur();    
+    void printWorld(glm::mat4 input);
 
 };
