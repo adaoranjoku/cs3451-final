@@ -35,13 +35,9 @@ public:
 	virtual void Initialize_Data()
 	{
 		Init_Shaders();
-		Init_Textures();
 		Init_Background();
 
-		Init_Bunny_Mesh();
-		Init_Plane_Mesh();
-		Init_Segment_Mesh();
-		Init_Sphere_Mesh();
+		Init_Tree_Mesh();
 
 		Init_Lighting();
 	}
@@ -64,16 +60,7 @@ public:
 	////Write your own vertex shader and fragment shader and add it to the shader library
 	void Init_Shaders()
 	{
-		Add_Shader("shaders/background.vert","shaders/background.frag","background");
-		Add_Shader("shaders/shared.vert", "shaders/lamb_textured.frag", "lamb_tex");
-		Add_Shader("shaders/shared.vert", "shaders/lamb.frag", "lamb");
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	////Read a texture from a image and add it to the texture library
-	void Init_Textures()
-	{
-		Add_Texture("models/bunny.jpg","bunny");
+		Add_Shader("shaders/tree.vert","shaders/tree.frag","l_sys");
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -85,10 +72,7 @@ public:
 		opengl_background->Initialize();
 	}
 
-	//////////////////////////////////////////////////////////////////////////
-	////Init a mesh and bind shader and texture
-	////To make your own mesh, copy this function and modify the variables
-	void Init_Bunny_Mesh() 
+	void Init_Tree_Mesh() 
 	{
 		////Initialize the mesh file, shader, and texture of the mesh
 		std::string mesh_file_name = "models/bunny.obj";
@@ -116,78 +100,6 @@ public:
 		////Add the triangle mesh to the array to access the mesh later
 		TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
 		triangle_meshes.push_back(triangle_mesh);
-	}
-
-	void Init_Plane_Mesh()
-	{
-		////Initialize the mesh file, shader, and texture of the mesh
-		std::string shader_name = "lamb";
-
-		OpenGLTriangleMesh* opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
-		////Create a mesh with vertices on a 5x5 lattice
-		Create_Plane_Mesh(5,5,1.,&opengl_tri_mesh->mesh,0,2);
-		Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Zero());
-
-		////Initialize the model matrix
-		opengl_tri_mesh->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-
-		////Other mesh initialization setups
-		Set_Mesh_Default_Options(opengl_tri_mesh);
-
-		////Bind an initialized shader to the mesh
-		opengl_tri_mesh->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader(shader_name));
-
-		////Add the triangle mesh to the array to access the mesh later
-		TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
-		triangle_meshes.push_back(triangle_mesh);		
-	}
-
-	void Init_Segment_Mesh()
-	{
-		OpenGLSegmentMesh* opengl_seg_mesh = Add_Interactive_Object<OpenGLSegmentMesh>();
-		////Create a mesh with vertices on a 5x5 lattice
-		SegmentMesh<3>* segment_mesh=&opengl_seg_mesh->mesh;
-		std::vector<Vector3>& vertices=segment_mesh->Vertices();
-		std::vector<Vector2i>& segments=segment_mesh->Elements();
-		vertices.push_back(Vector3::Zero());
-		vertices.push_back(Vector3::Unit(1));
-		vertices.push_back(Vector3(-1,2,0));
-		vertices.push_back(Vector3(1,2,0));
-		segments.push_back(Vector2i(0,1));
-		segments.push_back(Vector2i(1,2));
-		segments.push_back(Vector2i(1,3));
-
-		////Other mesh initialization setups
-		opengl_seg_mesh->color=OpenGLColor(1,1,0,1);
-		opengl_seg_mesh->line_width=2.f;
-
-		opengl_seg_mesh->Set_Data_Refreshed();
-		opengl_seg_mesh->Initialize();
-
-		////OpenGLSegmentMesh has a default shader, so you don't need to bind one in the driver
-	}
-
-	void Init_Sphere_Mesh()
-	{
-		////Initialize the mesh file, shader, and texture of the mesh
-		std::string shader_name = "lamb";
-
-		OpenGLTriangleMesh* opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
-		Create_Sphere_Mesh(0.5,&opengl_tri_mesh->mesh,4);
-		Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Zero());
-
-		////Initialize the model matrix
-		opengl_tri_mesh->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-1, .5, 0));
-
-		////Other mesh initialization setups
-		Set_Mesh_Default_Options(opengl_tri_mesh);
-
-		////Bind an initialized shader to the mesh
-		opengl_tri_mesh->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader(shader_name));
-
-		////Add the triangle mesh to the array to access the mesh later
-		TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
-		triangle_meshes.push_back(triangle_mesh);		
 	}
 
 	void Sync_Simulation_And_Visualization_Data()
