@@ -31,7 +31,7 @@ public:
 	Array<TriangleMesh<3>* > triangle_meshes;
 
     //stores TurtleInterpreter information
-    TurtleInterpreter::returnVar retTriple;
+    std::list<glm::mat4> world_transforms;
 
 	virtual void Initialize()
 	{
@@ -103,21 +103,21 @@ public:
 	void Init_Bunny_Mesh() 
 	{
 		////Initialize the mesh file, shader, and texture of the mesh
-		std::string mesh_file_name = "models/72_tri_cylinder.obj";
+		std::string mesh_file_name = "models/v2_high_poly.obj";
     	std::string shader_name = "lamb_tex";
 		std::string texture_name = "bunny";
 
         //get data structures from struct returned from Turtle Interpreter
         //local->world transforms
-        std::list<glm::mat4> matrices_from_turtle = retTriple.world_transforms;
+        //std::list<glm::mat4> matrices_from_turtle = retTriple.world_transforms;
         //lengths of cylinders
-        std::list<float> lengths = retTriple.lengths;
+        //std::list<float> lengths = retTriple.lengths;
         //rotations for each cylinder
-        std::list<glm::mat4>rotation = retTriple.rotations;
+        //std::list<glm::mat4>rotation = retTriple.rotations;
 
 
 		////Read meshs from obj file and transform them
-        for(auto transform : matrices_from_turtle ){
+        for(auto transform : world_transforms ){
 
 		    OpenGLTriangleMesh*opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
 		    Read_Mesh(mesh_file_name, opengl_tri_mesh->mesh);
@@ -125,11 +125,11 @@ public:
 
             //USER DEFINED 
             //Set the length of the Cylinder
-            ResizeZ(opengl_tri_mesh->mesh.Vertices(),lengths.front());
+           // ResizeZ(opengl_tri_mesh->mesh.Vertices(),lengths.front());
             //Rotate the mesh in place
-            RotateCyl(opengl_tri_mesh->mesh.Vertices(),rotation.front());
+           // RotateCyl(opengl_tri_mesh->mesh.Vertices(),rotation.front(), glm::mat4(transform[0],transform[1],transform[2],glm::vec4(0.0f)));
 
-		    Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Ones()*.5);
+		    //Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Ones()*.5);
 
 		    ////Initialize the model matrix
 		    opengl_tri_mesh->model_matrix = transform;
@@ -146,8 +146,8 @@ public:
     		////Add the triangle mesh to the array to access the mesh later
 	    	TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
 		    triangle_meshes.push_back(triangle_mesh);
-            lengths.pop_front();
-            rotation.pop_front();
+           // lengths.pop_front();
+           // rotation.pop_front();
         }
 
 	}
@@ -315,11 +315,18 @@ protected:
     }
 
     // Rotate the Cylinder mesh in place by transforming it by rotate
-    void RotateCyl(Array<Vector3>& vertices, const glm::mat4 rotate)
+    void RotateCyl(Array<Vector3>& vertices, const glm::mat4 rotate, const glm::mat4 original)
     {
-        for(auto& v: vertices){//v=Vector3((rotate * glm::vec4(v[0],v[1],v[2],(float)1.0)).xyz());
+  //      glm::mat4 transition = rotate-original;
+   //     Vector3 min_corner,max_corner;
+	//	Bounding_Box(vertices,min_corner,max_corner);
+//		Vector3 length=max_corner-min_corner;
+        for(auto& v: vertices){
+  //          Vector3 difference = max_corner -v;
+    //        float ratio = (length-difference).squaredNorm();
+
             //compute changed coordinates
-            glm::vec4 inter = (rotate * glm::vec4(v[0],v[1],v[2],(float)1.0));
+            glm::vec4 inter =(/*(original + (transition*ratio) )*/rotate * glm::vec4(v[0],v[1],v[2],(float)1.0));
             //change result to a Vector3 and save it
             v= Vector3(inter[0],inter[1],inter[2]);
         }
@@ -465,7 +472,7 @@ int main(int argc,char* argv[])
         // initialize interpreter
         auto interpreter = TurtleInterpreter(algae.currentSystem());
         // interpret system and store results in driver class variable
-        driver.retTriple = interpreter.readList();
+        driver.world_transforms = interpreter.readList();
         std::cout<<"Finished matrix array"<<std::endl;
         interpreter.printCur();
 

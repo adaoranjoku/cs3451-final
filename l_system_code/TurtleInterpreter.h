@@ -17,14 +17,16 @@
 
 class TurtleInterpreter
 {
-
+//    struct innerValues{
     glm::mat4 worldPos;
     glm::mat4 curRotate;
-
+//    }inVal;
+    //std::stack<innerValues> poses;
 
     std::list<Module> strings;
+    std::list<glm::mat4> world_transforms;
     std::stack<glm::mat4> poses;
-  
+    float prevLength;
 
     void readModule(Module& module);
     void buildRotation(float degreesTheta, float degreesPsy);
@@ -33,16 +35,16 @@ class TurtleInterpreter
 
 public:
 
-    struct returnVar{ 
+ /*   struct returnVar{ 
         std::list<glm::mat4> rotations;
         std::list<glm::mat4> world_transforms;
         std::list<float> lengths; 
-    }ret;
+    }ret;*/
 
     TurtleInterpreter();
     TurtleInterpreter(std::list<Module> input);
 
-    returnVar readList();
+    std::list<glm::mat4> readList();
     void printCur();    
 
 };
