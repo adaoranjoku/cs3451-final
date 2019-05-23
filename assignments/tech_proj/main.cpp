@@ -47,13 +47,9 @@ public:
 	virtual void Initialize_Data()
 	{
 		Init_Shaders();
-		Init_Textures();
-		Init_Background();
+		//Init_Background();
 
-		Init_Bunny_Mesh();
-		Init_Plane_Mesh();
-		Init_Segment_Mesh();
-		Init_Sphere_Mesh();
+		Init_Tree_Mesh();
 
 		Init_Lighting();
 	}
@@ -76,16 +72,8 @@ public:
 	////Write your own vertex shader and fragment shader and add it to the shader library
 	void Init_Shaders()
 	{
-		Add_Shader("shaders/background.vert","shaders/background.frag","background");
-		Add_Shader("shaders/shared.vert", "shaders/lamb_textured.frag", "lamb_tex");
-		Add_Shader("shaders/shared.vert", "shaders/lamb.frag", "lamb");
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	////Read a texture from a image and add it to the texture library
-	void Init_Textures()
-	{
-		Add_Texture("models/bunny.jpg","bunny");
+		Add_Shader("shaders/background.vert", "shaders/background.frag", "background");
+		Add_Shader("shaders/tree.vert","shaders/tree.frag","l_sys");
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -97,40 +85,26 @@ public:
 		opengl_background->Initialize();
 	}
 
-	//////////////////////////////////////////////////////////////////////////
-	////Init a mesh and bind shader and texture
-	////To make your own mesh, copy this function and modify the variables
-	void Init_Bunny_Mesh() 
+	void Init_Tree_Mesh() 
 	{
 		////Initialize the mesh file, shader, and texture of the mesh
 		std::string mesh_file_name = "models/v2_high_poly.obj";
-    	std::string shader_name = "lamb_tex";
-		std::string texture_name = "bunny";
+		std::string shader_name = "l_sys";
 
-        //get data structures from struct returned from Turtle Interpreter
-        //local->world transforms
-        //std::list<glm::mat4> matrices_from_turtle = retTriple.world_transforms;
-        //lengths of cylinders
-        //std::list<float> lengths = retTriple.lengths;
-        //rotations for each cylinder
-        //std::list<glm::mat4>rotation = retTriple.rotations;
+		////Read mesh from obj file
+		OpenGLTriangleMesh* opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
+		Read_Mesh(mesh_file_name, opengl_tri_mesh->mesh);
 
+		////Initialize the model matrix
+		opengl_tri_mesh->model_matrix = glm::mat4(1.0f);
+		opengl_tri_mesh->taper_ratio = 0.8f;
 
 		////Read meshs from obj file and transform them
         for(auto transform : world_transforms ){
 
 		    OpenGLTriangleMesh*opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
 		    Read_Mesh(mesh_file_name, opengl_tri_mesh->mesh);
-		    //Rescale(opengl_tri_mesh->mesh.Vertices(),1.);
-
-            //USER DEFINED 
-            //Set the length of the Cylinder
-           // ResizeZ(opengl_tri_mesh->mesh.Vertices(),lengths.front());
-            //Rotate the mesh in place
-           // RotateCyl(opengl_tri_mesh->mesh.Vertices(),rotation.front(), glm::mat4(transform[0],transform[1],transform[2],glm::vec4(0.0f)));
-
-		    //Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Ones()*.5);
-
+		    
 		    ////Initialize the model matrix
 		    opengl_tri_mesh->model_matrix = transform;
 
@@ -140,88 +114,10 @@ public:
     		////Bind an initialized shader to the mesh
 	    	opengl_tri_mesh->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader(shader_name));
 
-    		////Bind a texture to the mesh
-	    //	opengl_tri_mesh->Add_Texture("tex", OpenGLTextureLibrary::Get_Texture(texture_name));
-
     		////Add the triangle mesh to the array to access the mesh later
 	    	TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
 		    triangle_meshes.push_back(triangle_mesh);
-           // lengths.pop_front();
-           // rotation.pop_front();
         }
-
-	}
-
-	void Init_Plane_Mesh()
-	{
-		////Initialize the mesh file, shader, and texture of the mesh
-		std::string shader_name = "lamb";
-
-		OpenGLTriangleMesh* opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
-		////Create a mesh with vertices on a 5x5 lattice
-		Create_Plane_Mesh(5,5,1.,&opengl_tri_mesh->mesh,0,2);
-		Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Zero());
-
-		////Initialize the model matrix
-		opengl_tri_mesh->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-
-		////Other mesh initialization setups
-		Set_Mesh_Default_Options(opengl_tri_mesh);
-
-		////Bind an initialized shader to the mesh
-		opengl_tri_mesh->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader(shader_name));
-
-		////Add the triangle mesh to the array to access the mesh later
-		TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
-		triangle_meshes.push_back(triangle_mesh);		
-	}
-
-	void Init_Segment_Mesh()
-	{
-		OpenGLSegmentMesh* opengl_seg_mesh = Add_Interactive_Object<OpenGLSegmentMesh>();
-		////Create a mesh with vertices on a 5x5 lattice
-		SegmentMesh<3>* segment_mesh=&opengl_seg_mesh->mesh;
-		std::vector<Vector3>& vertices=segment_mesh->Vertices();
-		std::vector<Vector2i>& segments=segment_mesh->Elements();
-		vertices.push_back(Vector3::Zero());
-		vertices.push_back(Vector3::Unit(1));
-		vertices.push_back(Vector3(-1,2,0));
-		vertices.push_back(Vector3(1,2,0));
-		segments.push_back(Vector2i(0,1));
-		segments.push_back(Vector2i(1,2));
-		segments.push_back(Vector2i(1,3));
-
-		////Other mesh initialization setups
-		opengl_seg_mesh->color=OpenGLColor(1,1,0,1);
-		opengl_seg_mesh->line_width=2.f;
-
-		opengl_seg_mesh->Set_Data_Refreshed();
-		opengl_seg_mesh->Initialize();
-
-		////OpenGLSegmentMesh has a default shader, so you don't need to bind one in the driver
-	}
-
-	void Init_Sphere_Mesh()
-	{
-		////Initialize the mesh file, shader, and texture of the mesh
-		std::string shader_name = "lamb";
-
-		OpenGLTriangleMesh* opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
-		Create_Sphere_Mesh(0.5,&opengl_tri_mesh->mesh,4);
-		Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Zero());
-
-		////Initialize the model matrix
-		opengl_tri_mesh->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-1, .5, 0));
-
-		////Other mesh initialization setups
-		Set_Mesh_Default_Options(opengl_tri_mesh);
-
-		////Bind an initialized shader to the mesh
-		opengl_tri_mesh->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader(shader_name));
-
-		////Add the triangle mesh to the array to access the mesh later
-		TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
-		triangle_meshes.push_back(triangle_mesh);		
 	}
 
 	void Sync_Simulation_And_Visualization_Data()
@@ -268,115 +164,12 @@ protected:
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	////Add a texture to the texture library
-	void Add_Texture(const std::string texture_file_name,const std::string texture_name)
-	{
-		OpenGLTextureLibrary::Instance()->Add_Texture_From_File(texture_file_name, texture_name);
-	}
-
-	//////////////////////////////////////////////////////////////////////////
 	////Read an obj mesh
 	void Read_Mesh(const std::string mesh_file_name,TriangleMesh<3>& read_mesh)
 	{
 		Array<std::shared_ptr<TriangleMesh<3> > > meshes;
 		Obj::Read_From_Obj_File(mesh_file_name, meshes);
 		read_mesh=*meshes[0];
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	////Initialize a plane mesh
-	void Create_Plane_Mesh(const int m,const int n,const real dx,TriangleMesh<3>* mesh,int axis_0=0,int axis_1=1)
-	{
-		mesh->elements.resize(2*(m-1)*(n-1));int t=0;
-		for(int i=1;i<=m-1;i++)for(int j=1;j<=n-1;j++){ // counterclockwise node ordering
-			if(i%2){mesh->elements[t++]=Vector3i(i+m*(j-1),i+1+m*(j-1),i+m*j);mesh->elements[t++]=Vector3i(i+1+m*(j-1),i+1+m*j,i+m*j);}
-			else{mesh->elements[t++]=Vector3i(i+m*(j-1),i+1+m*(j-1),i+1+m*j);mesh->elements[t++]=Vector3i(i+m*(j-1),i+1+m*j,i+m*j);}}
-		for(size_type i=0;i<mesh->elements.size();i++){mesh->elements[i]-=Vector3i::Ones();
-		/*swap y and z*/int tmp=mesh->elements[i][1];mesh->elements[i][1]=mesh->elements[i][2];mesh->elements[i][2]=tmp;}
-		for(int j=0;j<n;j++)for(int i=0;i<m;i++){Vector3 pos=Vector3::Zero();pos[axis_0]=(real)i*dx;pos[axis_1]=(real)j*dx;mesh->Vertices().push_back(pos);}
-	}
-	
-	//////////////////////////////////////////////////////////////////////////
-	////Calculate the bounding box of a set of vertices
-	void Bounding_Box(const Array<Vector3>& vertices,Vector3& min_corner,Vector3& max_corner)
-	{
-		min_corner=Vector3::Ones()*(1e7);max_corner=Vector3::Ones()*(-1e7);
-		for(auto& v:vertices){
-			min_corner=min_corner.cwiseMin(v);
-			max_corner=max_corner.cwiseMax(v);}
-	}
-
-	/////////////////////////////////////////////// USER DEFINED ////////////////////////////////////////////
-    // Set the size of each cylinder by multiplying the vertex y value * length of cylinder
-    void ResizeZ(Array<Vector3>& vertices, const real length)
-    {
-        for(auto& v: vertices){v[1]*=length;}
-
-    }
-
-    // Rotate the Cylinder mesh in place by transforming it by rotate
-    void RotateCyl(Array<Vector3>& vertices, const glm::mat4 rotate, const glm::mat4 original)
-    {
-  //      glm::mat4 transition = rotate-original;
-   //     Vector3 min_corner,max_corner;
-	//	Bounding_Box(vertices,min_corner,max_corner);
-//		Vector3 length=max_corner-min_corner;
-        for(auto& v: vertices){
-  //          Vector3 difference = max_corner -v;
-    //        float ratio = (length-difference).squaredNorm();
-
-            //compute changed coordinates
-            glm::vec4 inter =(/*(original + (transition*ratio) )*/rotate * glm::vec4(v[0],v[1],v[2],(float)1.0));
-            //change result to a Vector3 and save it
-            v= Vector3(inter[0],inter[1],inter[2]);
-        }
- 
-    }
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-	////Rescale the points to a box with longest_length
-	void Rescale(Array<Vector3>& vertices,const real longest_length)
-	{
-		Vector3 min_corner,max_corner;
-		Bounding_Box(vertices,min_corner,max_corner);
-		Vector3 length=max_corner-min_corner;
-		int axis=0;if(length[1]>length[axis])axis=1;if(length[2]>length[axis])axis=2;
-		real rescale=(length[axis]>(real)0)?longest_length/length[axis]:(real)1;for(auto& v:vertices)v*=rescale;
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	////Calculate the center
-	Vector3 Center(const Array<Vector3>& vertices)
-	{
-		Vector3 sum=Vector3::Zero();for(auto& v:vertices)sum+=v;
-		return sum/=(real)vertices.size();
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	////Translate the center to the target position
-	void Translate_Center_To(Array<Vector3>& vertices,const Vector3 target)
-	{
-		Vector3 center=Center(vertices);
-		for(auto& v:vertices)v+=(target-center);
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	////Initialize a sphere mesh
-	void Create_Sphere_Mesh(const real r,/*rst*/TriangleMesh<3>* mesh,const int sub)
-	{
-		Initialize_Icosahedron_Mesh(r,mesh);for(int i=0;i<sub;i++)Subdivide(mesh);
-		for(auto& v:mesh->Vertices()){real length=v.norm();real rs=r/length;v*=rs;}
-	}
-
-	void Initialize_Icosahedron_Mesh(const real scale,/*rst*/TriangleMesh<3>* mesh)
-	{
-		////http://donhavey.com/blog/tutorials/tutorial-3-the-icosahedron-sphere/
-		const real tao=1.61803399f;
-		real vtx_pos[12][3]={{1,tao,0},{-1,tao,0},{1,-tao,0},{-1,-tao,0},{0,1,tao},{0,-1,tao},{0,1,-tao},{0,-1,-tao},{tao,0,1},{-tao,0,1},{tao,0,-1},{-tao,0,-1}};
-		int ele[20][3]={{0,1,4},{1,9,4},{4,9,5},{5,9,3},{2,3,7},{3,2,5},{7,10,2},{0,8,10},{0,4,8},{8,2,10},{8,4,5},{8,5,2},{1,0,6},{11,1,6},{3,9,11},{6,10,7},{3,11,7},{11,6,7},{6,0,10},{9,1,11}};		
-
-		mesh->Clear();
-		int vtx_num=12;mesh->Vertices().resize(vtx_num);for(int i=0;i<vtx_num;i++){mesh->Vertices()[i]=Vector3(vtx_pos[i][0],vtx_pos[i][1],vtx_pos[i][2])*scale;}
-		int ele_num=20;mesh->elements.resize(ele_num);for(int i=0;i<ele_num;i++)mesh->elements[i]=Vector3i(ele[i][0],ele[i][1],ele[i][2]);
 	}
 
 	void Subdivide(TriangleMesh<3>* mesh)
@@ -462,26 +255,16 @@ int main(int argc,char* argv[])
 		algae.iterate();
 		std::cout << std::endl << algae.toString() << std::endl << std::flush;
 	}
-        
-    
-	int driver=1;
-
-	switch(driver){
-	case 1:{
-		TechProjDriver driver;
-        // initialize interpreter
-        auto interpreter = TurtleInterpreter(algae.currentSystem());
-        // interpret system and store results in driver class variable
-        driver.world_transforms = interpreter.readList();
-        std::cout<<"Finished matrix array"<<std::endl;
-        interpreter.printCur();
-
-		driver.Initialize();
-    	driver.Run();	
-	}break;
-	}
-
-	//Create modules
 	
+	TechProjDriver driver;
+    // initialize interpreter
+    auto interpreter = TurtleInterpreter(algae.currentSystem());
+    // interpret system and store results in driver class variable
+    driver.world_transforms = interpreter.readList();
+    std::cout<<"Finished matrix array"<<std::endl;
+    interpreter.printCur();
+    
+	driver.Initialize();
+	driver.Run();
 }
 
