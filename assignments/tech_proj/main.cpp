@@ -41,7 +41,7 @@ public:
 	virtual void Initialize_Data()
 	{
 		Init_Shaders();
-		Init_Background();
+		//Init_Background();
 
 		Init_Tree_Mesh();
 
@@ -66,6 +66,7 @@ public:
 	////Write your own vertex shader and fragment shader and add it to the shader library
 	void Init_Shaders()
 	{
+		Add_Shader("shaders/background.vert", "shaders/background.frag", "background");
 		Add_Shader("shaders/tree.vert","shaders/tree.frag","l_sys");
 	}
 
@@ -81,27 +82,22 @@ public:
 	void Init_Tree_Mesh() 
 	{
 		////Initialize the mesh file, shader, and texture of the mesh
-		std::string mesh_file_name = "models/bunny.obj";
-		std::string shader_name = "lamb_tex";
-		std::string texture_name = "bunny";
+		std::string mesh_file_name = "models/v2_high_poly.obj";
+		std::string shader_name = "l_sys";
 
 		////Read mesh from obj file
 		OpenGLTriangleMesh* opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
 		Read_Mesh(mesh_file_name, opengl_tri_mesh->mesh);
-		Rescale(opengl_tri_mesh->mesh.Vertices(),1.);
-		Translate_Center_To(opengl_tri_mesh->mesh.Vertices(),Vector3::Ones()*.5);
 
 		////Initialize the model matrix
-		opengl_tri_mesh->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+		opengl_tri_mesh->model_matrix = glm::mat4(1.0f);
+		opengl_tri_mesh->taper_ratio = 0.8f;
 
 		////Other mesh initialization setups
 		Set_Mesh_Default_Options(opengl_tri_mesh);
 
 		////Bind an initialized shader to the mesh
 		opengl_tri_mesh->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader(shader_name));
-
-		////Bind a texture to the mesh
-		opengl_tri_mesh->Add_Texture("tex", OpenGLTextureLibrary::Get_Texture(texture_name));
 
 		////Add the triangle mesh to the array to access the mesh later
 		TriangleMesh<3>* triangle_mesh=&opengl_tri_mesh->mesh;
@@ -168,19 +164,6 @@ protected:
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	////Initialize a plane mesh
-	void Create_Plane_Mesh(const int m,const int n,const real dx,TriangleMesh<3>* mesh,int axis_0=0,int axis_1=1)
-	{
-		mesh->elements.resize(2*(m-1)*(n-1));int t=0;
-		for(int i=1;i<=m-1;i++)for(int j=1;j<=n-1;j++){ // counterclockwise node ordering
-			if(i%2){mesh->elements[t++]=Vector3i(i+m*(j-1),i+1+m*(j-1),i+m*j);mesh->elements[t++]=Vector3i(i+1+m*(j-1),i+1+m*j,i+m*j);}
-			else{mesh->elements[t++]=Vector3i(i+m*(j-1),i+1+m*(j-1),i+1+m*j);mesh->elements[t++]=Vector3i(i+m*(j-1),i+1+m*j,i+m*j);}}
-		for(size_type i=0;i<mesh->elements.size();i++){mesh->elements[i]-=Vector3i::Ones();
-		/*swap y and z*/int tmp=mesh->elements[i][1];mesh->elements[i][1]=mesh->elements[i][2];mesh->elements[i][2]=tmp;}
-		for(int j=0;j<n;j++)for(int i=0;i<m;i++){Vector3 pos=Vector3::Zero();pos[axis_0]=(real)i*dx;pos[axis_1]=(real)j*dx;mesh->Vertices().push_back(pos);}
-	}
-	
-	//////////////////////////////////////////////////////////////////////////
 	////Calculate the bounding box of a set of vertices
 	void Bounding_Box(const Array<Vector3>& vertices,Vector3& min_corner,Vector3& max_corner)
 	{
@@ -215,26 +198,6 @@ protected:
 	{
 		Vector3 center=Center(vertices);
 		for(auto& v:vertices)v+=(target-center);
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	////Initialize a sphere mesh
-	void Create_Sphere_Mesh(const real r,/*rst*/TriangleMesh<3>* mesh,const int sub)
-	{
-		Initialize_Icosahedron_Mesh(r,mesh);for(int i=0;i<sub;i++)Subdivide(mesh);
-		for(auto& v:mesh->Vertices()){real length=v.norm();real rs=r/length;v*=rs;}
-	}
-
-	void Initialize_Icosahedron_Mesh(const real scale,/*rst*/TriangleMesh<3>* mesh)
-	{
-		////http://donhavey.com/blog/tutorials/tutorial-3-the-icosahedron-sphere/
-		const real tao=1.61803399f;
-		real vtx_pos[12][3]={{1,tao,0},{-1,tao,0},{1,-tao,0},{-1,-tao,0},{0,1,tao},{0,-1,tao},{0,1,-tao},{0,-1,-tao},{tao,0,1},{-tao,0,1},{tao,0,-1},{-tao,0,-1}};
-		int ele[20][3]={{0,1,4},{1,9,4},{4,9,5},{5,9,3},{2,3,7},{3,2,5},{7,10,2},{0,8,10},{0,4,8},{8,2,10},{8,4,5},{8,5,2},{1,0,6},{11,1,6},{3,9,11},{6,10,7},{3,11,7},{11,6,7},{6,0,10},{9,1,11}};		
-
-		mesh->Clear();
-		int vtx_num=12;mesh->Vertices().resize(vtx_num);for(int i=0;i<vtx_num;i++){mesh->Vertices()[i]=Vector3(vtx_pos[i][0],vtx_pos[i][1],vtx_pos[i][2])*scale;}
-		int ele_num=20;mesh->elements.resize(ele_num);for(int i=0;i<ele_num;i++)mesh->elements[i]=Vector3i(ele[i][0],ele[i][1],ele[i][2]);
 	}
 
 	void Subdivide(TriangleMesh<3>* mesh)
@@ -320,17 +283,9 @@ int main(int argc,char* argv[])
 		algae.iterate();
 		std::cout << std::endl << algae.toString() << std::endl << std::flush;
 	}
-	//int driver=1;
-
-	//switch(driver){
-	//case 1:{
-	//	TechProjDriver driver;
-	//	driver.Initialize();
-	//	driver.Run();	
-	//}break;
-	//}
-
-	//Create modules
 	
+	TechProjDriver driver;
+	driver.Initialize();
+	driver.Run();
 }
 
