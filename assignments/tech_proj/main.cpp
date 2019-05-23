@@ -121,7 +121,7 @@ public:
 
 		    OpenGLTriangleMesh*opengl_tri_mesh = Add_Interactive_Object<OpenGLTriangleMesh>();
 		    Read_Mesh(mesh_file_name, opengl_tri_mesh->mesh);
-		    Rescale(opengl_tri_mesh->mesh.Vertices(),1.);
+		    //Rescale(opengl_tri_mesh->mesh.Vertices(),1.);
 
             //USER DEFINED 
             //Set the length of the Cylinder
