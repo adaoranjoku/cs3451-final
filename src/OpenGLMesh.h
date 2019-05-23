@@ -159,6 +159,8 @@ class OpenGLTriangleMesh : public OpenGLMesh<TriangleMesh<3> >
 	std::shared_ptr<OpenGLFbos::OpenGLFbo> fbo;
 	glm::mat4 shadow_pv;
 	glm::mat4 model_matrix = glm::mat4(1.0f);
+
+	float taper_ratio;
 	
 	bool use_mat=false;
 	Material mat;
@@ -277,6 +279,7 @@ class OpenGLTriangleMesh : public OpenGLMesh<TriangleMesh<3> >
 				}
 
 				shader->Set_Uniform_Matrix4f("model", glm::value_ptr(model_matrix));
+				shader->Set_Uniform("ratio", taper_ratio);
 				glBindVertexArray(vao);
 				glDrawElements(GL_TRIANGLES, ele_size, GL_UNSIGNED_INT, 0);
 				glDisable(GL_POLYGON_OFFSET_FILL);
