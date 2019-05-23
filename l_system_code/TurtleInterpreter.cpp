@@ -75,15 +75,15 @@ Rotate the current rotation matrix on x and z axis.
 
 */
 void TurtleInterpreter::buildRotation(float theta, float psy){
-    theta=60;
-    psy=60;
+    theta=0;
+    psy=0;
     float rotation[16] ={
         cos(theta)*cos(psy),    -1*sin(theta),   sin(psy),  0, //x = v[0]
         sin(theta),             cos(theta),      0,         0, //y = v[1]      
         sin(psy),               0,               cos(psy),  0, //z = v[2]
-        0,                      0,               0,         0, //0 = v[3] 
+        0,                      0,               0,         1, //0 = v[3] 
         }; 
-    curRotate = glm::make_mat4(rotation);
+    curRotate = curRotate * glm::make_mat4(rotation);
 
 /* 
     std::cout<<"IN ROTATION"<<std::endl;
@@ -120,7 +120,7 @@ void TurtleInterpreter::buildTranslation(float length){
 
 //////////////
 
-    glm::mat4 T = glm::translate(glm::mat4(1.0f), glm::vec3(0.f,1.f,0.f));
+    glm::mat4 T = glm::translate(glm::mat4(1.0f), glm::vec3(0.f,prevLength,0.f));
     glm::mat4 translate = worldPos * T;
 
 ////////////
@@ -129,16 +129,23 @@ void TurtleInterpreter::buildTranslation(float length){
     TurtleInterpreter::printWorld(worldPos);
     TurtleInterpreter::printWorld(translate);
     std::cout<<"MULTIPLICATION"<<std::endl;            
-    TurtleInterpreter::printWorld(scale);            
+    TurtleInterpreter::printWorld(scale);
+	TurtleInterpreter::printWorld(translate*curRotate);
     TurtleInterpreter::printWorld(curRotate*scale);            
     TurtleInterpreter::printWorld(translate*curRotate*scale);            
 /////////////////////
-    worldPos = translate * curRotate * scale;
+	worldPos = worldPos * T;
+	worldPos *= curRotate;
+	worldPos *= scale;
+
+    //worldPos = translate * curRotate * scale;
 ///////////////////
     TurtleInterpreter::printWorld(worldPos);
     std::cout<<"END MULTIPLICATION"<<std::endl;            
 ////////////////
     world_transforms.push_back(worldPos);
+
+	worldPos = translate * curRotate;
 
     std::cout<<"Prevlength End"<<prevLength<<std::endl;
   //  worldPos = worldPos * glm::inverse(scale);
@@ -160,6 +167,7 @@ void TurtleInterpreter::buildTranslation(float length){
     std::cout<<"after update, not yet pushed to list"<<std::endl;
     TurtleInterpreter::printWorld(worldPos);            
     */
+	prevLength = length;
 }
 
 /*
