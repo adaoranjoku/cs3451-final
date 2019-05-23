@@ -110,27 +110,35 @@ Rotation: The value of rotation is the rotation of the world transform mastrix (
 Length: The value of length is the parameter passed to the function.
 worldPos: world transform of a segment in the coordinate space  of the last branch. Updated for the next branch with the current branch's          length as the transform and rotation.  
 */
-void TurtleInterpreter::buildTranslation(int length){
+void TurtleInterpreter::buildTranslation(float length){
 
     std::cout<<"Prevlength Start"<<prevLength<<std::endl;
 
+////////////////
+
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(1,length,1));
 
-    glm::vec4 inter=glm::vec4((glm::vec4(0,prevLength,0,0)*worldPos[1]) + worldPos[3] );
-    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(inter));
-//    glm::mat4 translate = glm::mat4(glm::vec4(worldPos[0]),glm::vec4(worldPos[1]),glm::vec4(worldPos[2]), worldPos*glm::vec4(0,prevLength,0,1));//glm::translate(glm::mat4(1.0f), glm::vec3(0,prevLength,0) ) * worldPos;
+//////////////
+
+    glm::mat4 T = glm::translate(glm::mat4(1.0f), glm::vec3(0.f,1.f,0.f));
+    glm::mat4 translate = worldPos * T;
+
+////////////
     std::cout<<"TRANSLATE"<<std::endl;
+    TurtleInterpreter::printWorld(T);
+    TurtleInterpreter::printWorld(worldPos);
     TurtleInterpreter::printWorld(translate);
     std::cout<<"MULTIPLICATION"<<std::endl;            
     TurtleInterpreter::printWorld(scale);            
     TurtleInterpreter::printWorld(curRotate*scale);            
     TurtleInterpreter::printWorld(translate*curRotate*scale);            
+/////////////////////
     worldPos = translate * curRotate * scale;
-    
+///////////////////
     TurtleInterpreter::printWorld(worldPos);
     std::cout<<"END MULTIPLICATION"<<std::endl;            
+////////////////
     world_transforms.push_back(worldPos);
-    prevLength=length;
 
     std::cout<<"Prevlength End"<<prevLength<<std::endl;
   //  worldPos = worldPos * glm::inverse(scale);

@@ -411,7 +411,7 @@ int main(int argc,char* argv[])
 	alphabet['A'] = 2;
 	alphabet['B'] = 1;
 	alphabet['C'] = 0;
-	std::string axiom = "B(2)A(4,4)B(6)A(1,1)B(8)B(5)";
+	std::string axiom = "B(2)A(4,4)B(6)";
 	std::map<char, Rules> productions;
 	productions['A'] = Rules();
 	productions['B'] = Rules();
@@ -458,7 +458,7 @@ int main(int argc,char* argv[])
 
 	System algae = System(alphabet, axiom, productions);
 	std::cout << std::endl << algae.toString() << std::endl << std::flush;
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 0; i++) {
 		algae.iterate();
 		std::cout << std::endl << algae.toString() << std::endl << std::flush;
 	}

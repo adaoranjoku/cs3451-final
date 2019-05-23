@@ -30,7 +30,7 @@ class TurtleInterpreter
 
     void readModule(Module& module);
     void buildRotation(float degreesTheta, float degreesPsy);
-    void buildTranslation(int length);
+    void buildTranslation(float length);
     void printWorld(glm::mat4 input);
 
 public:
