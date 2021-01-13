@@ -27,10 +27,10 @@ template<int d> class A0_Driver : public Driver, public OpenGLViewer
 	const std::string draw_pixels= To_String(
 		void mainImage(out vec4 fragColor, in vec2 fragCoord)
 		{
-			////////////////////////////////////////////////////////////////
-			// Replace the code below with your own code                  //
+			///////////////////////////////////////////////////////////////////
+			// Replace the code below with your own code                     //
 		    // Recently only iResolution and iTime are supported as Uniforms //
-			////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////
 
 			// Normalized pixel coordinates (from 0 to 1)
 			vec2 uv = fragCoord / iResolution.xy;
@@ -38,7 +38,7 @@ template<int d> class A0_Driver : public Driver, public OpenGLViewer
 			vec3 col = 0.5 + 0.5*cos(iTime + uv.xyx + vec3(0, 2, 4));
 			// Output to screen
 			fragColor = vec4(col, 1.0);
-			//////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////
 		}
 	);
 
@@ -48,7 +48,6 @@ public:
 		OpenGLViewer::Initialize();
 	}
 
-	/// Called when initialized
 	virtual void Initialize_Data()
 	{
 		OpenGLShaderLibrary::Instance()->Create_Screen_Shader(draw_pixels, "shaderToy");
@@ -68,7 +67,6 @@ public:
 		screen_cover->setTime(GLfloat(clock() - startTime) / CLOCKS_PER_SEC);
 	}
 
-	////update variables for each time step
 	virtual void Toggle_Next_Frame()
 	{
 		Uniform_Update();
