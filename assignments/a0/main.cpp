@@ -16,31 +16,76 @@
 #include "OpenGLMarkerObjects.h"
 #include "OpenGLParticles.h"
 
-#define To_String(S) #S
+const std::string draw_pixels = To_String(
+/////////////////////////////////////////////////////////////////////
+// Belowing code is used in fragment shaders and is written in GLSL//                                                 //
+// https://www.khronos.org/files/opengl43-quick-reference-card.pdf //
+// Page 6 - 7 would probably be helpful!                           //
+/////////////////////////////////////////////////////////////////////
+float M_PI = 3.1415926535;
+
+bool inSphere(vec2 p, vec2 center, float radius) {
+	vec2 to_center = p - center;
+	if (dot(to_center, to_center) < radius * radius) {
+		return true;
+	}
+	return false;
+}
+
+bool inTriangle(vec2 p, vec2 p1, vec2 p2, vec2 p3) {
+	if (dot(cross(vec3(p2 - p1, 0), vec3(p - p1, 0)), cross(vec3(p2 - p1, 0), vec3(p3 - p1, 0))) >= 0 && 
+		dot(cross(vec3(p3 - p2, 0), vec3(p - p2, 0)), cross(vec3(p3 - p2, 0), vec3(p1 - p2, 0))) >= 0 && 
+		dot(cross(vec3(p1 - p3, 0), vec3(p - p3, 0)), cross(vec3(p1 - p3, 0), vec3(p2 - p3, 0))) >= 0) {
+		return true;
+	}
+	return false;
+}
+
+vec2 polar2cart(float angle, float length) {
+	return vec2(cos(angle) * length, sin(angle) * length);
+}
+
+/////////////////////////////////////////////////////////////////////
+// Feed free to add more functions if needed!                      //
+/////////////////////////////////////////////////////////////////////
+
+vec4 paintGrid(float x, float y) {
+/////////////////////////////////////////////////////////////////////
+// Todo: replace the code below with your own code                 //
+// Recently only iResolution and iTime are supported as Uniforms   //
+/////////////////////////////////////////////////////////////////////
+	vec2 center = vec2(64, 48);
+	vec2 p1 = polar2cart(iTime, 16) + center;
+	vec2 p2 = polar2cart(iTime + 2 * M_PI / 3, 16) + center;
+	vec2 p3 = polar2cart(iTime + 4 * M_PI / 3, 16) + center;
+	vec2 p4 = polar2cart(iTime + M_PI / 3, 16) + center;
+	vec2 p5 = polar2cart(iTime + M_PI, 16) + center;
+	vec2 p6 = polar2cart(iTime + 5 * M_PI / 3, 16) + center;
+	bool inTrangle1 = inTriangle(vec2(x, y), p1, p2, p3);
+	bool inTrangle2 = inTriangle(vec2(x, y), p4, p5, p6);
+	if (inTrangle1 && inTrangle2) {
+		return vec4(1.0);
+	} else if (inTrangle1 || inTrangle2) {
+		return vec4(vec3(217, 249, 255) / 255, 1);
+	} else {
+		return vec4(vec3(184, 243, 255) / 255, 1);
+	}
+///////////////////////////////////////////////////////////////////
+}
+
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
+{
+	fragColor = paintGrid(floor(fragCoord.x/10), floor(fragCoord.y/10));
+}
+);
+
 
 template<int d> class A0_Driver : public Driver, public OpenGLViewer
 {
 	using VectorD = Vector<real, d>; using VectorDi = Vector<int, d>; using Base = Driver;
 	OpenGLScreenCover* screen_cover = nullptr;
 	clock_t startTime = clock();
-
-	const std::string draw_pixels= To_String(
-		void mainImage(out vec4 fragColor, in vec2 fragCoord)
-		{
-			///////////////////////////////////////////////////////////////////
-			// Replace the code below with your own code                     //
-		    // Recently only iResolution and iTime are supported as Uniforms //
-			///////////////////////////////////////////////////////////////////
-
-			// Normalized pixel coordinates (from 0 to 1)
-			vec2 uv = fragCoord / iResolution.xy;
-			// Time varying pixel color
-			vec3 col = 0.5 + 0.5*cos(iTime + uv.xyx + vec3(0, 2, 4));
-			// Output to screen
-			fragColor = vec4(col, 1.0);
-			///////////////////////////////////////////////////////////////////
-		}
-	);
 
 public:
 	virtual void Initialize()
