@@ -314,7 +314,7 @@ class OpenGLScreenCover : public OpenGLMesh<TriangleMesh<3> >
 public:typedef OpenGLMesh<TriangleMesh<3> > Base;
 	   std::shared_ptr<OpenGLFbos::OpenGLFbo> fbo;
 	   GLfloat iTime = 0;
-	   Vector2f iResolution = Vector2f(1080, 720);
+	   Vector2f iResolution = Vector2f(1280, 960);
 
 	   void setResolution(float w, float h) {
 		   iResolution = Vector2f(w, h);
