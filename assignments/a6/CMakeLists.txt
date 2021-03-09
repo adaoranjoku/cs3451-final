@@ -89,7 +89,7 @@ include_directories(${root_path}/ext/tiny_gltf)
 #set compiling flags
 set(CMAKE_CXX_STANDARD 11)	#c++11
 if(UNIX)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")	#c++11
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-all -std=c++11")	#c++11
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare")	#turn off sign-compare warning
 endif(UNIX)
 if(WIN32)
