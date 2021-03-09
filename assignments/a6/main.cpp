@@ -132,48 +132,81 @@ public:
 		return (int)mesh_object_array.size()-1;
 	}
 
-	////this is an example of adding an object with manually created triangles and vertex attributes
-	int Add_Object_3()
+	////This function adds a mesh object from an obj file
+	int Add_Obj_Mesh_Object(std::string obj_file_name)
 	{
 		auto mesh_obj=Add_Interactive_Object<OpenGLTriangleMesh>();
-		auto& mesh=mesh_obj->mesh;
 
-		////vertex position
-		std::vector<Vector3> triangle_vertices={Vector3(-1,-1,-1),Vector3(1,-1,-1),Vector3(-1,-1,1),Vector3(1,-1,1)};
-		std::vector<Vector3>& vertices=mesh_obj->mesh.Vertices();
-		vertices=triangle_vertices;
-			
-		////vertex color
-		std::vector<Vector4f>& vtx_color=mesh_obj->vtx_color;
-		vtx_color={Vector4f(1.f,0.f,0.f,1.f),Vector4f(0.f,1.f,0.f,1.f),Vector4f(0.f,0.f,1.f,1.f),Vector4f(1.f,1.f,0.f,1.f)};
+		Array<std::shared_ptr<TriangleMesh<3> > > meshes;
+		Obj::Read_From_Obj_File_Discrete_Triangles(obj_file_name,meshes);
+		mesh_obj->mesh=*meshes[0];
+		std::cout<<"load tri_mesh from obj file, #vtx: "<<mesh_obj->mesh.Vertices().size()<<", #ele: "<<mesh_obj->mesh.Elements().size()<<std::endl;		
 
-		////vertex normal
-		std::vector<Vector3>& vtx_normal=mesh_obj->vtx_normal;
-		vtx_normal={Vector3(0.,1.,0.),Vector3(0.,1.,0.),Vector3(0.,1.,0.),Vector3(0.,1.,0.)};
-
-		////vertex uv
-		std::vector<Vector2>& uv=mesh_obj->mesh.Uvs();
-		uv={Vector2(0.,0.),Vector2(1.,0.),Vector2(0.,1.),Vector2(1.,1.)};
-
-		////mesh elements
-		std::vector<Vector3i>& elements=mesh_obj->mesh.Elements();
-		elements={Vector3i(0,1,3),Vector3i(0,3,2)};
-
-		////set up shader
-		mesh_obj->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("object_3"));
-		
-		////set up texture
-		mesh_obj->Add_Texture("tex_albedo", OpenGLTextureLibrary::Get_Texture("object_3_albedo"));
-		mesh_obj->Add_Texture("tex_normal", OpenGLTextureLibrary::Get_Texture("object_3_normal"));
-		Set_Polygon_Mode(mesh_obj,PolygonMode::Fill);
-		Set_Shading_Mode(mesh_obj,ShadingMode::Texture);
-
-		////initialize
-		mesh_obj->Set_Data_Refreshed();
-		mesh_obj->Initialize();	
 		mesh_object_array.push_back(mesh_obj);
 		return (int)mesh_object_array.size()-1;
 	}
+
+	virtual void Initialize_Data_1()
+	{
+		std::string name = "model";
+		// if(part ==1)
+		name = "object_3";
+		OpenGLShaderLibrary::Instance()->Add_Shader_From_File(name + ".vert", name +".frag", "a4_shader");		
+		////add the plane mesh object
+		int obj_idx=Add_Obj_Mesh_Object("plane.obj");
+		auto plane_obj=mesh_object_array[obj_idx];
+		plane_obj->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("a4_shader"));
+
+		Set_Polygon_Mode(plane_obj, PolygonMode::Fill);
+		Set_Shading_Mode(plane_obj, ShadingMode::Texture);
+		plane_obj->Set_Data_Refreshed();
+		plane_obj->Initialize();
+	}
+
+
+
+	// ////this is an example of adding an object with manually created triangles and vertex attributes
+	// int Add_Object_3()
+	// {
+	// 	auto mesh_obj=Add_Interactive_Object<OpenGLTriangleMesh>();
+	// 	auto& mesh=mesh_obj->mesh;
+
+	// 	////vertex position
+	// 	std::vector<Vector3> triangle_vertices={Vector3(-1,-1,-1),Vector3(1,-1,-1),Vector3(-1,-1,1),Vector3(1,-1,1)};
+	// 	std::vector<Vector3>& vertices=mesh_obj->mesh.Vertices();
+	// 	vertices=triangle_vertices;
+			
+	// 	////vertex color
+	// 	std::vector<Vector4f>& vtx_color=mesh_obj->vtx_color;
+	// 	vtx_color={Vector4f(1.f,0.f,0.f,1.f),Vector4f(0.f,1.f,0.f,1.f),Vector4f(0.f,0.f,1.f,1.f),Vector4f(1.f,1.f,0.f,1.f)};
+
+	// 	////vertex normal
+	// 	std::vector<Vector3>& vtx_normal=mesh_obj->vtx_normal;
+	// 	vtx_normal={Vector3(0.,1.,0.),Vector3(0.,1.,0.),Vector3(0.,1.,0.),Vector3(0.,1.,0.)};
+
+	// 	////vertex uv
+	// 	std::vector<Vector2>& uv=mesh_obj->mesh.Uvs();
+	// 	uv={Vector2(0.,0.),Vector2(1.,0.),Vector2(0.,1.),Vector2(1.,1.)};
+
+	// 	////mesh elements
+	// 	std::vector<Vector3i>& elements=mesh_obj->mesh.Elements();
+	// 	elements={Vector3i(0,1,3),Vector3i(0,3,2)};
+
+	// 	////set up shader
+	// 	mesh_obj->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("object_3"));
+		
+	// 	////set up texture
+	// 	mesh_obj->Add_Texture("tex_albedo", OpenGLTextureLibrary::Get_Texture("object_3_albedo"));
+	// 	mesh_obj->Add_Texture("tex_normal", OpenGLTextureLibrary::Get_Texture("object_3_normal"));
+	// 	Set_Polygon_Mode(mesh_obj,PolygonMode::Fill);
+	// 	Set_Shading_Mode(mesh_obj,ShadingMode::Texture);
+
+	// 	////initialize
+	// 	mesh_obj->Set_Data_Refreshed();
+	// 	mesh_obj->Initialize();	
+	// 	mesh_object_array.push_back(mesh_obj);
+	// 	return (int)mesh_object_array.size()-1;
+	// }
 
 	virtual void Initialize_Data()
 	{
@@ -183,7 +216,7 @@ public:
 		Add_Background();
 		Add_Object_1();
 		Add_Object_2();
-		Add_Object_3();
+		Initialize_Data_1();
 	}
 
 	////Goto next frame 
