@@ -42,23 +42,24 @@ public:
 	{
 		////format: vertex shader name, fragment shader name, shader name
 		OpenGLShaderLibrary::Instance()->Add_Shader_From_File("background.vert","background.frag","background");	
-		OpenGLShaderLibrary::Instance()->Add_Shader_From_File("object_1.vert","object_1.frag","object_1");		
-		OpenGLShaderLibrary::Instance()->Add_Shader_From_File("object_2.vert","object_2.frag","object_2");	
-		OpenGLShaderLibrary::Instance()->Add_Shader_From_File("object_3.vert","object_3.frag","object_3");	
+		OpenGLShaderLibrary::Instance()->Add_Shader_From_File("water.vert", "water.frag", "water");
+		OpenGLShaderLibrary::Instance()->Add_Shader_From_File("sphere.vert","sphere.frag","sphere");	
+		// OpenGLShaderLibrary::Instance()->Add_Shader_From_File("object_1.vert","object_1.frag","object_1");		
+		// OpenGLShaderLibrary::Instance()->Add_Shader_From_File("object_3.vert","object_3.frag","object_3");	
 	}
 
 	void Add_Textures()
 	{
 		////format: image name, texture name
-		OpenGLTextureLibrary::Instance()->Add_Texture_From_File("earth_albedo.png", "object_1_albedo");		
-		OpenGLTextureLibrary::Instance()->Add_Texture_From_File("earth_normal.png", "object_1_normal");
-		OpenGLTextureLibrary::Instance()->Add_Texture_From_File("earth_albedo.png", "object_2_albedo");		
-		OpenGLTextureLibrary::Instance()->Add_Texture_From_File("earth_normal.png", "object_2_normal");
-		OpenGLTextureLibrary::Instance()->Add_Texture_From_File("earth_albedo.png", "object_3_albedo");		
-		OpenGLTextureLibrary::Instance()->Add_Texture_From_File("earth_normal.png", "object_3_normal");
-
+		OpenGLTextureLibrary::Instance()->Add_Texture_From_File("textures/earth_albedo.png", "sphere_albedo");
+		OpenGLTextureLibrary::Instance()->Add_Texture_From_File("textures/earth_normal.png", "sphere_normal");
+		// OpenGLTextureLibrary::Instance()->Add_Texture_From_File("textures/earth_albedo.png", "object_1_albedo");		
+		// OpenGLTextureLibrary::Instance()->Add_Texture_From_File("textures/earth_normal.png", "object_1_normal");
+		// OpenGLTextureLibrary::Instance()->Add_Texture_From_File("textures/earth_albedo.png", "object_3_albedo");		
+		// OpenGLTextureLibrary::Instance()->Add_Texture_From_File("textures/earth_normal.png", "object_3_normal");
 	}
 
+	// Add background
 	void Add_Background()
 	{
 		OpenGLBackground* opengl_background=Add_Interactive_Object<OpenGLBackground>();
@@ -66,13 +67,66 @@ public:
 		opengl_background->Initialize();
 	}
 
+	// Add a mesh object from an obj file
+	int Add_Obj_Mesh_Object(std::string obj_file_name)
+	{
+		auto mesh_obj=Add_Interactive_Object<OpenGLTriangleMesh>();
+
+		Array<std::shared_ptr<TriangleMesh<3> > > meshes;
+		Obj::Read_From_Obj_File_Discrete_Triangles(obj_file_name,meshes);
+		mesh_obj->mesh=*meshes[0];
+		std::cout<<"load tri_mesh from obj file, #vtx: "<<mesh_obj->mesh.Vertices().size()<<", #ele: "<<mesh_obj->mesh.Elements().size()<<std::endl;		
+
+		mesh_object_array.push_back(mesh_obj);
+		return (int)mesh_object_array.size()-1;
+	}
+
+	// Add water using plane.obj
+	virtual void Add_Water()
+	{
+		////add the plane mesh object
+		int obj_idx=Add_Obj_Mesh_Object("obj/plane.obj");
+		auto plane_obj=mesh_object_array[obj_idx];
+		plane_obj->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("water"));
+
+		Set_Polygon_Mode(plane_obj, PolygonMode::Fill);
+		Set_Shading_Mode(plane_obj, ShadingMode::Texture);
+		plane_obj->Set_Data_Refreshed();
+		plane_obj->Initialize();
+	}
+
+	// Add a spherical mesh object generated analytically
+	int Add_Sphere()
+	{
+		auto mesh_obj=Add_Interactive_Object<OpenGLTriangleMesh>();
+
+		real radius=1.;
+		Initialize_Sphere_Mesh(radius,&mesh_obj->mesh,3);		////add a sphere with radius=1. if the obj file name is not specified
+
+		////set up shader
+		mesh_obj->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("sphere"));
+		
+		////set up texture
+		mesh_obj->Add_Texture("tex_albedo", OpenGLTextureLibrary::Get_Texture("sphere_albedo"));
+		mesh_obj->Add_Texture("tex_normal", OpenGLTextureLibrary::Get_Texture("sphere_normal"));
+		Set_Polygon_Mode(mesh_obj,PolygonMode::Fill);
+		Set_Shading_Mode(mesh_obj,ShadingMode::Texture);
+		
+		////initialize
+		mesh_obj->Set_Data_Refreshed();
+		mesh_obj->Initialize();	
+		mesh_object_array.push_back(mesh_obj);
+		return (int)mesh_object_array.size()-1;
+	}
+
+	/*
 	////this is an example of adding a mesh object read from obj file
 	int Add_Object_1()
 	{
 		auto mesh_obj=Add_Interactive_Object<OpenGLTriangleMesh>();
 
 		////read mesh file
-		std::string obj_file_name="bunny.obj";
+		std::string obj_file_name="obj/bunny.obj";
 		Array<std::shared_ptr<TriangleMesh<3> > > meshes;
 		Obj::Read_From_Obj_File_Discrete_Triangles(obj_file_name,meshes);
 		mesh_obj->mesh=*meshes[0];
@@ -107,31 +161,9 @@ public:
 		mesh_object_array.push_back(mesh_obj);
 		return (int)mesh_object_array.size()-1;
 	}
+	*/
 
-	////this is an example of adding a spherical mesh object generated analytically
-	int Add_Object_2()
-	{
-		auto mesh_obj=Add_Interactive_Object<OpenGLTriangleMesh>();
-
-		real radius=1.;
-		Initialize_Sphere_Mesh(radius,&mesh_obj->mesh,3);		////add a sphere with radius=1. if the obj file name is not specified
-
-		////set up shader
-		mesh_obj->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("object_2"));
-		
-		////set up texture
-		mesh_obj->Add_Texture("tex_albedo", OpenGLTextureLibrary::Get_Texture("object_2_albedo"));
-		mesh_obj->Add_Texture("tex_normal", OpenGLTextureLibrary::Get_Texture("object_2_normal"));
-		Set_Polygon_Mode(mesh_obj,PolygonMode::Fill);
-		Set_Shading_Mode(mesh_obj,ShadingMode::Texture);
-		
-		////initialize
-		mesh_obj->Set_Data_Refreshed();
-		mesh_obj->Initialize();	
-		mesh_object_array.push_back(mesh_obj);
-		return (int)mesh_object_array.size()-1;
-	}
-
+	/*
 	////this is an example of adding an object with manually created triangles and vertex attributes
 	int Add_Object_3()
 	{
@@ -174,6 +206,7 @@ public:
 		mesh_object_array.push_back(mesh_obj);
 		return (int)mesh_object_array.size()-1;
 	}
+	*/
 
 	virtual void Initialize_Data()
 	{
@@ -181,9 +214,8 @@ public:
 		Add_Textures();
 
 		Add_Background();
-		Add_Object_1();
-		Add_Object_2();
-		Add_Object_3();
+		Add_Water();
+		Add_Sphere();
 	}
 
 	////Goto next frame 
