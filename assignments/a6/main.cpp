@@ -93,7 +93,7 @@ public:
 		std::vector<Vector3>& vertices = plane_obj->mesh.Vertices();
 		int vn = (int)vertices.size();
 		for(int i=0; i<vn; i++){
-			vertices[i] -= Vector3(2.525, 2.525, 0.);
+			vertices[i] = 5 * (vertices[i] - Vector3(2.525, 2.525, 0.));
 		}
 		// std::cout << "start " << vertices[0] << std::endl;
 		// std::cout << "end " << vertices[vn-1] << std::endl;
