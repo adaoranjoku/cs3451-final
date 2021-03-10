@@ -89,6 +89,15 @@ public:
 		auto plane_obj=mesh_object_array[obj_idx];
 		plane_obj->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("water"));
 
+		////modify the vertices so that the plane is centered at the origin
+		std::vector<Vector3>& vertices = plane_obj->mesh.Vertices();
+		int vn = (int)vertices.size();
+		for(int i=0; i<vn; i++){
+			vertices[i] -= Vector3(2.525, 2.525, 0.);
+		}
+		// std::cout << "start " << vertices[0] << std::endl;
+		// std::cout << "end " << vertices[vn-1] << std::endl;
+
 		Set_Polygon_Mode(plane_obj, PolygonMode::Fill);
 		Set_Shading_Mode(plane_obj, ShadingMode::Texture);
 		plane_obj->Set_Data_Refreshed();
@@ -101,7 +110,7 @@ public:
 		auto mesh_obj=Add_Interactive_Object<OpenGLTriangleMesh>();
 
 		real radius=1.;
-		Initialize_Sphere_Mesh(radius,&mesh_obj->mesh,3);		////add a sphere with radius=1. if the obj file name is not specified
+		Initialize_Sphere_Mesh(radius,&mesh_obj->mesh,3); ////add a sphere with radius=1. if the obj file name is not specified
 
 		////set up shader
 		mesh_obj->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("sphere"));
