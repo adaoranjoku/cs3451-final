@@ -26,7 +26,7 @@
 
 class FinalProjectDriver : public Driver, public OpenGLViewer
 {using Base=Driver;
-	std::vector<OpenGLTriangleMesh*> mesh_object_array;						////mesh objects, every object you put in this array will be rendered.
+	std::vector<OpenGLTriangleMesh*> mesh_object_array; ////mesh objects, every object you put in this array will be rendered.
 	clock_t startTime;
 
 public:
@@ -109,8 +109,8 @@ public:
 	{
 		auto mesh_obj=Add_Interactive_Object<OpenGLTriangleMesh>();
 
-		real radius=1.;
-		Initialize_Sphere_Mesh(radius,&mesh_obj->mesh,3); ////add a sphere with radius=1. if the obj file name is not specified
+		real radius = 10.;
+		Initialize_Sphere_Mesh(radius, &mesh_obj->mesh, 3);
 
 		////set up shader
 		mesh_obj->Add_Shader_Program(OpenGLShaderLibrary::Get_Shader("sphere"));
