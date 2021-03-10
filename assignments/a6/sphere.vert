@@ -22,8 +22,10 @@ layout (location=3) in vec4 uv;			/*vertex uv*/
 layout (location=4) in vec4 tangent;	/*vertex tangent*/	
 
 /*output variables*/
+out vec3 vtx_pos;
 
 void main()												
 {
 	gl_Position=pvm*vec4(pos.xyz,1.f);
+	vtx_pos = pos.xyz;
 }	
