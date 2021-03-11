@@ -152,7 +152,7 @@ vec3 get_color(vec2 v)
 	
 	float blend = height(v);
 	float changeColor = abs(sin(iTime));
-	vec3 emissiveColor = mix(mix(PINK, PURPLE_BLUE, blend * 2), mix(PURPLE_BLUE, PURPLE, blend ), blend * changeColor);
+	vec3 emissiveColor = mix(mix(PINK, PURPLE_BLUE, blend * 2), mix(PURPLE_BLUE, PURPLE, blend ), changeColor);
 	vec3 lightingColor= vec3(1.,1.,1.);
 
 	// Your implementation starts here
