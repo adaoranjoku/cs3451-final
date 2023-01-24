@@ -50,6 +50,18 @@ const float PIXEL_SIZE = 10.;
 // This shader is part of a tutorial on YouTube
 // https://youtu.be/PGtv-dBi2wE
 
+// Reference: Ray Marching for Dummies: https://www.shadertoy.com/view/XlGBW3.
+
+//////////////////////////////////////////////////////////////////////////
+///					    Original license information                   ///
+//////////////////////////////////////////////////////////////////////////
+// "ShaderToy Tutorial - Ray Marching for Dummies!" 
+// by Martijn Steinrucken aka BigWings/CountFrolic - 2018
+// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+//
+// This shader is part of a tutorial on YouTube
+// https://youtu.be/PGtv-dBi2wE
+
 
 
 const int MAX_STEPS = 100;
@@ -135,6 +147,19 @@ float sdBox(vec3 p, vec3 s) {
 	return length(max(abs(p) - s, 0.));
 }
 
+float sdTorus(vec3 p, vec2 r) {
+	float x = length(p.xz) - r.x;
+	return length(vec2(x, p.y)) - r.y;
+}
+
+// CSG Operations:
+// See also: https://www.shadertoy.com/view/lt3BW2
+float opSmoothUnion(float d1, float d2, float k)
+{
+	float h = max(k - abs(d1 - d2), 0.0);
+	return min(d1, d2) - h * h * 0.25 / k;
+}
+
 float map(in vec3 pos)
 {
 	// Mapping reference: https://www.shadertoy.com/view/wsSGDG.
@@ -148,7 +173,8 @@ float map(in vec3 pos)
 float SDF_EvaluateDistance(vec3 p) {
 	// RGB => sphere position
 	// A   => radius
-	ShapeSphere sphere = ShapeSphere(vec3(0, 1, 6), 1.0);
+	float an = sin(iTime);
+	ShapeSphere sphere = ShapeSphere(vec3(0, 1.0 + 0.3 * an, 6), 1.0);
 	ShapePlane  plane = ShapePlane(vec3(0, 1, 0), 0.0);
 
 	float sphereDist = SDF_Sphere(sphere, p);
@@ -156,11 +182,20 @@ float SDF_EvaluateDistance(vec3 p) {
 	float octahedronDist = map(p - vec3(1.5, 0.5, 3.5));
 	float capsuleDist = sdCapsule(p, vec3(3, .5, 6), vec3(3, 2.5, 6), .5);
 	float boxDist = sdBox(p - vec3(-3.0, 0.5, 6.0), vec3(0.5, 0.5, 0.7));
+	float torusDist = sdTorus(p - vec3(0, 1, 6), vec2(1.3, 0.3));
 
-	float t = min(sphereDist, planeDist);
+
+	float t = planeDist;
 	t = min(t, octahedronDist);
 	t = min(t, capsuleDist);
 	t = min(t, boxDist);
+
+	// CSG Operation for sphere and torus
+	{
+		float dt = opSmoothUnion(sphereDist, torusDist, 0.25);
+		t = min(t, dt);
+	}
+
 	return t;
 }
 
@@ -237,19 +272,20 @@ vec3 Integrator_EstimateDirectLighting(vec3 p) {
 	// lambert's law.
 	float absCosine = clamp(dot(n, wi), 0., 1.);
 
+	// This part for shadowing.
 	// Send shadow ray.
-	Ray shadowRay = Ray(p + n * SURF_DIST * 2. /* specify an offset to avoid self intersection*/,
-		wi               /* ray direction */);
+	//Ray shadowRay = Ray(p+n*SURF_DIST*2. /* specify an offset to avoid self intersection*/, 
+	//                    wi               /* ray direction */);
 
 	// Find a closest hit point.
-	float t = ClosestHit_RayMarching(shadowRay);
+	//float t = ClosestHit_RayMarching(shadowRay);
 
 	// Since our ray's direction is normalized, t is the distance.
 	// If our closest hit distance is less than the light's distance, we are blocked.
-	if (t < length(lightPos - p))
-	{
-		return vec3(0, 0, 0);
-	}
+	//if(t < length(lightPos-p))
+	//{
+	//    return vec3(0, 0, 0);
+	//}
 
 	return absCosine * lightIntensity;
 }
@@ -270,8 +306,8 @@ Ray Camera_Perspective_GenerateRay(in vec2 uv)
 {
 	Ray ray;
 	// Y Up.
-	ray.o = vec3(0, 1, 0);
-	ray.d = normalize(vec3(uv.x, uv.y, 1));
+	ray.o = vec3(0, 2, 0);
+	ray.d = normalize(vec3(uv.x, uv.y + 0.0, 0.8));
 
 	return ray;
 }
@@ -302,6 +338,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 	// Write to output framebuffer.
 	fragColor = vec4(col, 1.0);
 }
+
 );
 
 class AX_RayMarch_SDF_Driver : public Driver, public OpenGLViewer
